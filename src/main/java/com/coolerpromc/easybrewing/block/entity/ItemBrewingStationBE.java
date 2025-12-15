@@ -400,7 +400,8 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
                 potionHandler.getStackInSlot(0),
                 inputHandler.getStackInSlot(0),
                 outputHandler.getStackInSlot(0),
-                upgradeHandler.getStackInSlot(0)
+                upgradeHandler.getStackInSlot(0),
+                upgradeHandler.getStackInSlot(1)
         );
 
         Containers.dropContents(level, getBlockPos(), container);
