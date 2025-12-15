@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "easybrewing",
+  "version": "${version}",
+  "name": "EasyBrewing",
+  "description": "This mod add brewing station to the game that support upgrade, which make potion to brew faster and more productive. It is compatible with Cobblemon brewing Stand Recipe too!",
+  "authors": [
+    "CoolerProMC"
+  ],
+  "contact": {
+    "homepage": "https://coolerpromc.com/",
+    "sources": "https://github.com/CoolerProYT/EasyBrewing"
+  },
+  "license": "MIT",
+  "icon": "assets/easybrewing/icon.png",
+  "environment": "*",
+  "accessWidener": "easybrewing.classtweaker",
+  "entrypoints": {
+    "main": [
+      "com.coolerpromc.easybrewing.EasyBrewing"
+    ],
+    "client": [
+      "com.coolerpromc.easybrewing.EasyBrewingClient"
+    ],
+    "fabric-datagen": [
+      "com.coolerpromc.easybrewing.datagen.DataGenerator"
+    ],
+    "rei_client": [
+      "com.coolerpromc.easybrewing.compat.rei.ModReiPlugin"
+    ],
+    "jei": [
+      "com.coolerpromc.easybrewing.compat.jei.ModJeiPlugin"
+    ]
+  },
+  "mixins": [
+    "easybrewing.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.2",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "cobblemon": "*"
+  }
+}
