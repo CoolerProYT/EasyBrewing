@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "easybrewing:amount_upgrade_1"
+    },
+    "D": {
+      "tag": "c:gems/diamond"
+    },
+    "G": {
+      "item": "minecraft:glass_bottle"
+    }
+  },
+  "pattern": [
+    "GDG",
+    "DAD",
+    "GDG"
+  ],
+  "result": {
+    "count": 1,
+    "id": "easybrewing:amount_upgrade_2"
+  }
+}

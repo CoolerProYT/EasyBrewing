@@ -106,6 +106,7 @@ publishMods {
     type = STABLE
     modLoaders.add("fabric")
     changelog = file("changelog.md").text
+    displayName = "Easy Brewing - " + mod_version
 
     curseforge {
         projectId = "1405256"
