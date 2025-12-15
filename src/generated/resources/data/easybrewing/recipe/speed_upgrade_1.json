@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "tag": "c:ingots/gold"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "item": "easybrewing:upgrade_base"
+    }
+  },
+  "pattern": [
+    "GRG",
+    "RSR",
+    "GRG"
+  ],
+  "result": {
+    "count": 1,
+    "id": "easybrewing:speed_upgrade_1"
+  }
+}

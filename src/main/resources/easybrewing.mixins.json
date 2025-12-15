@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "com.coolerpromc.easybrewing.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LingeringPotionItemMixin",
+    "PotionItemMixin",
+    "SplashPotionItemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
