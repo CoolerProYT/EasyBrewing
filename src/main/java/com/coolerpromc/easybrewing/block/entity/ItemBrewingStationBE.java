@@ -15,36 +15,36 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.PotionItem;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.Containers;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.alchemy.PotionBrewing;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.recipe.BrewingRecipeRegistry;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.PropertyDelegate;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,24 +53,24 @@ import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
 public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenHandlerFactory<BlockPos> {
-    public final ContainerData data;
-    public final SimpleContainer fuelHandler = new SimpleContainer(1){
+    public final PropertyDelegate data;
+    public final SimpleInventory fuelHandler = new SimpleInventory(1){
         @Override
-        public boolean canPlaceItem(int slot, ItemStack stack) {
-            return stack.is(Items.BLAZE_POWDER);
+        public boolean isValid(int slot, ItemStack stack) {
+            return stack.isOf(Items.BLAZE_POWDER);
         }
     };
-    public final SimpleContainer potionHandler = new SimpleContainer(1){
+    public final SimpleInventory potionHandler = new SimpleInventory(1){
         @Override
-        public boolean canPlaceItem(int slot, ItemStack stack) {
+        public boolean isValid(int slot, ItemStack stack) {
             return isValidPotion(stack);
         }
     };
-    public final SimpleContainer inputHandler = new SimpleContainer(1);
+    public final SimpleInventory inputHandler = new SimpleInventory(1);
     public final OutputItemStackHandler outputHandler = new OutputItemStackHandler();
-    public final SimpleContainer upgradeHandler = new SimpleContainer(2){
+    public final SimpleInventory upgradeHandler = new SimpleInventory(2){
         @Override
-        public boolean canPlaceItem(int slot, ItemStack stack) {
+        public boolean isValid(int slot, ItemStack stack) {
             if (slot == 1){
                 return stack.getItem() instanceof AmountUpgradeItem;
             }
@@ -93,7 +93,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
 
     public ItemBrewingStationBE(BlockPos pos, BlockState blockState) {
         super(EasyBrewing.ITEM_BREWING_STATION_BE, pos, blockState);
-        this.data = new ContainerData() {
+        this.data = new PropertyDelegate() {
             @Override
             public int get(int i) {
                 return switch (i){
@@ -120,7 +120,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
             }
 
             @Override
-            public int getCount() {
+            public int size() {
                 return 8;
             }
         };
@@ -130,6 +130,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         upgradeHandler.addListener(container -> {
             handleUpgrade();
             getAdditionalAmount();
+            markDirty();
         });
     }
 
@@ -143,86 +144,86 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     @Override
-    public @NotNull Component getDisplayName() {
-        return Component.translatable("block.easybrewing.item_brewing_station");
+    public @NotNull Text getDisplayName() {
+        return Text.translatable("block.easybrewing.item_brewing_station");
     }
 
     @Override
-    public @Nullable AbstractContainerMenu createMenu(int i, @NotNull Inventory inventory, @NotNull Player player) {
+    public @Nullable ScreenHandler createMenu(int i, @NotNull PlayerInventory inventory, @NotNull PlayerEntity player) {
         return new ItemBrewingStationMenu(i, inventory, this, data);
     }
 
     @Override
-    public BlockPos getScreenOpeningData(ServerPlayer player) {
-        return this.getBlockPos();
+    public BlockPos getScreenOpeningData(ServerPlayerEntity player) {
+        return this.getPos();
     }
 
     @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void writeNbt(@NotNull NbtCompound tag, RegistryWrapper.WrapperLookup registries) {
+        super.writeNbt(tag, registries);
 
-        tag.put("fuelHandler", ContainerHelper.saveAllItems(new CompoundTag(), fuelHandler.items, registries));
-        tag.put("potionHandler", ContainerHelper.saveAllItems(new CompoundTag(), potionHandler.items, registries));
-        tag.put("inputHandler", ContainerHelper.saveAllItems(new CompoundTag(), inputHandler.items, registries));
-        tag.put("outputHandler", ContainerHelper.saveAllItems(new CompoundTag(), outputHandler.items, registries));
-        tag.put("upgradeHandler", ContainerHelper.saveAllItems(new CompoundTag(), upgradeHandler.items, registries));
+        tag.put("fuelHandler", Inventories.writeNbt(new NbtCompound(), fuelHandler.heldStacks, registries));
+        tag.put("potionHandler", Inventories.writeNbt(new NbtCompound(), potionHandler.heldStacks, registries));
+        tag.put("inputHandler", Inventories.writeNbt(new NbtCompound(), inputHandler.heldStacks, registries));
+        tag.put("outputHandler", Inventories.writeNbt(new NbtCompound(), outputHandler.heldStacks, registries));
+        tag.put("upgradeHandler", Inventories.writeNbt(new NbtCompound(), upgradeHandler.heldStacks, registries));
 
         tag.putInt("progress", progress);
         tag.putInt("maxProgress", maxProgress);
         tag.putInt("fuel", fuel);
         tag.putFloat("multiplier", multiplier);
         tag.putInt("additionalAmount", additionalAmount);
-        tag.put("capabilityBySide", ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow());
+        tag.put("capabilityBySide", Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow());
     }
 
     @Override
-    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void readNbt(@NotNull NbtCompound tag, RegistryWrapper.@NotNull WrapperLookup registries) {
+        super.readNbt(tag, registries);
 
-        ContainerHelper.loadAllItems(tag.getCompound("fuelHandler"), fuelHandler.items, registries);
-        ContainerHelper.loadAllItems(tag.getCompound("potionHandler"), potionHandler.items, registries);
-        ContainerHelper.loadAllItems(tag.getCompound("inputHandler"), inputHandler.items, registries);
-        ContainerHelper.loadAllItems(tag.getCompound("outputHandler"), outputHandler.items, registries);
-        ContainerHelper.loadAllItems(tag.getCompound("upgradeHandler"), upgradeHandler.items, registries);
+        Inventories.readNbt(tag.getCompound("fuelHandler"), fuelHandler.heldStacks, registries);
+        Inventories.readNbt(tag.getCompound("potionHandler"), potionHandler.heldStacks, registries);
+        Inventories.readNbt(tag.getCompound("inputHandler"), inputHandler.heldStacks, registries);
+        Inventories.readNbt(tag.getCompound("outputHandler"), outputHandler.heldStacks, registries);
+        Inventories.readNbt(tag.getCompound("upgradeHandler"), upgradeHandler.heldStacks, registries);
 
         progress = tag.getInt("progress");
         maxProgress = tag.getInt("maxProgress");
         fuel = tag.getInt("fuel");
         multiplier = tag.getFloat("multiplier");
         additionalAmount = tag.getInt("additionalAmount");
-        capabilityBySide = new HashMap<>(ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow());
+        capabilityBySide = new HashMap<>(Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow());
     }
 
     @Override
-    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
+    public @NotNull NbtCompound toInitialChunkDataNbt(RegistryWrapper.@NotNull WrapperLookup registries) {
+        NbtCompound tag = new NbtCompound();
+        writeNbt(tag, registries);
         return tag;
     }
 
     @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+    public @Nullable Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
     }
 
-    public void tick(Level level, BlockPos pos, BlockState blockState) {
-        if (level.isClientSide()) return;
+    public void tick(World level, BlockPos pos, BlockState blockState) {
+        if (level.isClient()) return;
 
         handleFuel();
         checkUpgrade();
 
-        if (isBrewable(level.potionBrewing()) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonRecipeCheck.hasRecipe(this))){
+        if (isBrewable(level.getBrewingRecipeRegistry()) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonRecipeCheck.hasRecipe(this))){
             progress++;
-            setChanged(level, pos, blockState);
+            markDirty(level, pos, blockState);
 
             if (progress >= maxProgress){
-                if (isBrewable(level.potionBrewing())){
-                    doBrew(level.potionBrewing());
+                if (isBrewable(level.getBrewingRecipeRegistry())){
+                    doBrew(level.getBrewingRecipeRegistry());
                 }
                 else if (FabricLoader.getInstance().isModLoaded("cobblemon")){
                     CobblemonRecipeCheck.craft(this);
                 }
-                level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 1.0F);
+                level.playSound(null, pos, SoundEvents.BLOCK_BREWING_STAND_BREW, SoundCategory.BLOCKS, 1.0F, 1.0F);
                 progress = 0;
             }
         }
@@ -244,7 +245,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
 
     private void handleUpgrade(){
         maxProgress = CommonConfig.CONFIG.processingTime;
-        ItemStack upgradeStack = upgradeHandler.getItem(0);
+        ItemStack upgradeStack = upgradeHandler.getStack(0);
 
         if (!upgradeStack.isEmpty() && upgradeStack.getItem() instanceof SpeedUpgradeItem upgradeItem){
             float multiplier = upgradeItem.getSpeedMultiplier();
@@ -265,11 +266,11 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
 
     private void handleFuel(){
         if (fuel <= 0){
-            ItemStack fuelStack = fuelHandler.getItem(0);
-            if (fuelStack.is(Items.BLAZE_POWDER)){
+            ItemStack fuelStack = fuelHandler.getStack(0);
+            if (fuelStack.isOf(Items.BLAZE_POWDER)){
                 fuel = 20;
                 try(Transaction tx = Transaction.openOuter()){
-                    long extracted = fuelStorage.extract(ItemVariant.of(fuelHandler.getItem(0)), 1, tx);
+                    long extracted = fuelStorage.extract(ItemVariant.of(fuelHandler.getStack(0)), 1, tx);
                     if (extracted == 1){
                         tx.commit();
                     }
@@ -278,21 +279,21 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         }
     }
 
-    private boolean isBrewable(PotionBrewing potionBrewing) {
-        ItemStack ingredient = inputHandler.getItem(0);
+    private boolean isBrewable(BrewingRecipeRegistry potionBrewing) {
+        ItemStack ingredient = inputHandler.getStack(0);
         if (ingredient.isEmpty()) {
             return false;
-        } else if (!potionBrewing.isIngredient(ingredient)) {
+        } else if (!potionBrewing.isValidIngredient(ingredient)) {
             return false;
         } else {
-            ItemStack potion = potionHandler.getItem(0);
-            return !potion.isEmpty() && potionBrewing.hasMix(potion, ingredient) && hasEnoughInput() && canInsertIntoOutputSlot(potionBrewing) && hasFuel();
+            ItemStack potion = potionHandler.getStack(0);
+            return !potion.isEmpty() && potionBrewing.hasRecipe(potion, ingredient) && hasEnoughInput() && canInsertIntoOutputSlot(potionBrewing) && hasFuel();
         }
     }
 
     public void getAdditionalAmount(){
-        if (CommonConfig.CONFIG.allowAmountUpgrade && upgradeHandler.getItem(1).getItem() instanceof AmountUpgradeItem upgradeItem){
-            int effectiveUpgrade = Math.min(upgradeHandler.getItem(1).getCount(), CommonConfig.CONFIG.maxAmountUpgrade);
+        if (CommonConfig.CONFIG.allowAmountUpgrade && upgradeHandler.getStack(1).getItem() instanceof AmountUpgradeItem upgradeItem){
+            int effectiveUpgrade = Math.min(upgradeHandler.getStack(1).getCount(), CommonConfig.CONFIG.maxAmountUpgrade);
             additionalAmount = upgradeItem.getAmount() * effectiveUpgrade;
         }
         else{
@@ -301,15 +302,15 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     private boolean hasEnoughInput(){
-        return potionHandler.getItem(0).getCount() >= CommonConfig.CONFIG.potionCount() + additionalAmount;
+        return potionHandler.getStack(0).getCount() >= CommonConfig.CONFIG.potionCount() + additionalAmount;
     }
 
     public boolean hasFuel(){
         return fuel > 0;
     }
 
-    private boolean canInsertIntoOutputSlot(PotionBrewing potionbrewing){
-        ItemStack output = potionbrewing.mix(inputHandler.getItem(0), potionHandler.getItem(0));
+    private boolean canInsertIntoOutputSlot(BrewingRecipeRegistry potionbrewing){
+        ItemStack output = potionbrewing.craft(inputHandler.getStack(0), potionHandler.getStack(0));
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
         try(Transaction tx = Transaction.openOuter()){
             long inserted = outputStorage.insert(ItemVariant.of(output), output.getCount(), tx);
@@ -317,26 +318,26 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         }
     }
 
-    private void doBrew(PotionBrewing potionbrewing) {
-        ItemStack ingredient = inputHandler.getItem(0);
-        ItemStack potion = potionHandler.getItem(0);
-        ItemStack output = potionbrewing.mix(ingredient, potion);
+    private void doBrew(BrewingRecipeRegistry potionbrewing) {
+        ItemStack ingredient = inputHandler.getStack(0);
+        ItemStack potion = potionHandler.getStack(0);
+        ItemStack output = potionbrewing.craft(ingredient, potion);
 
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
 
         if (!ingredient.getRecipeRemainder().isEmpty()) {
             ItemStack leftover = ingredient.getRecipeRemainder();
-            ingredient.shrink(1);
+            ingredient.decrement(1);
             if (ingredient.isEmpty()) {
                 ingredient = leftover;
             } else {
-                Containers.dropItemStack(level, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), leftover);
+                ItemScatterer.spawn(world, getPos().getX(), getPos().getY(), getPos().getZ(), leftover);
             }
         } else {
-            ingredient.shrink(1);
+            ingredient.decrement(1);
         }
 
-        inputHandler.setItem(0, ingredient);
+        inputHandler.setStack(0, ingredient);
         try(Transaction tx = Transaction.openOuter()){
             potionStorage.extract(potionStorage.getSlot(0).getResource(), CommonConfig.CONFIG.potionCount() + additionalAmount, tx);
             tx.commit();
@@ -362,8 +363,8 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
 
     public void setCapabilityBySide(Direction direction, Slot slot){
         capabilityBySide.put(direction, slot);
-        setChanged();
-        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        markDirty();
+        world.updateListeners(getPos(), getCachedState(), getCachedState(), 3);
     }
 
     public Slot getCapabilityBySide(Direction direction){
@@ -371,19 +372,20 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     private boolean isValidPotion(ItemStack stack){
-        return stack.getItem() instanceof PotionItem || stack.is(Items.GLASS_BOTTLE) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, level));
+        return stack.getItem() instanceof PotionItem || stack.isOf(Items.GLASS_BOTTLE) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, world));
     }
 
     public void drops(){
-        SimpleContainer container = new SimpleContainer(
-                fuelHandler.getItem(0),
-                potionHandler.getItem(0),
-                inputHandler.getItem(0),
-                outputHandler.getItem(0),
-                upgradeHandler.getItem(0)
+        SimpleInventory container = new SimpleInventory(
+                fuelHandler.getStack(0),
+                potionHandler.getStack(0),
+                inputHandler.getStack(0),
+                outputHandler.getStack(0),
+                upgradeHandler.getStack(0),
+                upgradeHandler.getStack(1)
         );
 
-        Containers.dropContents(level, getBlockPos(), container);
+        ItemScatterer.spawn(world, getPos(), container);
     }
 
     public enum Slot{
@@ -393,7 +395,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         OUTPUT(0xFFde5d07, 39);
 
         public static final Codec<Slot> CODEC = Codec.STRING.xmap(Slot::valueOf, Slot::name);
-        public static final StreamCodec<RegistryFriendlyByteBuf, Slot> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
+        public static final PacketCodec<RegistryByteBuf, Slot> STREAM_CODEC = PacketCodecs.registryCodec(CODEC);
 
         public final int color;
         public final int slotIndex;

@@ -28,7 +28,7 @@
     "rei_client": [
       "com.coolerpromc.easybrewing.compat.rei.ModReiPlugin"
     ],
-    "jei": [
+    "jei_mod_plugin": [
       "com.coolerpromc.easybrewing.compat.jei.ModJeiPlugin"
     ]
   },

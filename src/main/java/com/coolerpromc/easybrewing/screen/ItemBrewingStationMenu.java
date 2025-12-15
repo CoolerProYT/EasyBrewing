@@ -2,55 +2,79 @@ package com.coolerpromc.easybrewing.screen;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ArrayPropertyDelegate;
+import net.minecraft.screen.PropertyDelegate;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
-public class ItemBrewingStationMenu extends AbstractContainerMenu {
+public class ItemBrewingStationMenu extends ScreenHandler {
     private final ItemBrewingStationBE blockEntity;
-    private final Level level;
-    private final ContainerData data;
+    private final World level;
+    private final PropertyDelegate data;
 
-    public ItemBrewingStationMenu(int containerId, Inventory playerInventory, BlockPos pos) {
-        this(containerId, playerInventory, playerInventory.player.level().getBlockEntity(pos), new SimpleContainerData(8));
+    public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, BlockPos pos) {
+        this(containerId, playerInventory, playerInventory.player.getWorld().getBlockEntity(pos), new ArrayPropertyDelegate(8));
     }
 
-    public ItemBrewingStationMenu(int containerId, Inventory playerInventory, BlockEntity blockEntity, ContainerData data){
+    public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, BlockEntity blockEntity, PropertyDelegate data){
         super(EasyBrewing.ITEM_BREWING_STATION_MENU, containerId);
         this.blockEntity = (ItemBrewingStationBE) blockEntity;
-        this.level = playerInventory.player.level();
+        this.level = playerInventory.player.getWorld();
         this.data = data;
 
         addPlayerInventory(playerInventory);
         addPlayerHotbar(playerInventory);
 
-        SimpleContainer fuelHandler = this.blockEntity.fuelHandler;
-        this.addSlot(new Slot(fuelHandler, 0, 17, 17));
+        SimpleInventory fuelHandler = this.blockEntity.fuelHandler;
+        this.addSlot(new Slot(fuelHandler, 0, 17, 17){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return fuelHandler.isValid(0, stack);
+            }
+        });
 
-        SimpleContainer potionHandler = this.blockEntity.potionHandler;
-        this.addSlot(new Slot(potionHandler, 0, 79, 17));
+        SimpleInventory potionHandler = this.blockEntity.potionHandler;
+        this.addSlot(new Slot(potionHandler, 0, 79, 17){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return potionHandler.isValid(0, stack);
+            }
+        });
 
-        SimpleContainer inputHandler = this.blockEntity.inputHandler;
+        SimpleInventory inputHandler = this.blockEntity.inputHandler;
         this.addSlot(new Slot(inputHandler, 0, 59, 37));
 
-        SimpleContainer outputHandler = this.blockEntity.outputHandler;
+        SimpleInventory outputHandler = this.blockEntity.outputHandler;
         this.addSlot(new Slot(outputHandler, 0, 79, 57){
             @Override
-            public boolean mayPlace(ItemStack stack) {
+            public boolean canInsert(ItemStack stack) {
                 return false;
             }
         });
 
-        SimpleContainer upgradeHandler = this.blockEntity.upgradeHandler;
-        this.addSlot(new Slot(upgradeHandler, 0, 154, 6));
-        this.addSlot(new Slot(upgradeHandler, 1, 154, 24));
+        SimpleInventory upgradeHandler = this.blockEntity.upgradeHandler;
+        this.addSlot(new Slot(upgradeHandler, 0, 154, 6){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return upgradeHandler.isValid(0, stack);
+            }
+        });
+        this.addSlot(new Slot(upgradeHandler, 1, 154, 24){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return upgradeHandler.isValid(1, stack);
+            }
+        });
 
-        addDataSlots(data);
+        addProperties(data);
     }
 
     private static final int HOTBAR_SLOT_COUNT = 9;
@@ -63,18 +87,18 @@ public class ItemBrewingStationMenu extends AbstractContainerMenu {
     private static final int TE_INVENTORY_SLOT_COUNT = 6;
 
     @Override
-    public ItemStack quickMoveStack(Player player, int pIndex) {
+    public ItemStack quickMove(PlayerEntity player, int pIndex) {
         Slot sourceSlot = slots.get(pIndex);
-        if (sourceSlot == null || !sourceSlot.hasItem()) return ItemStack.EMPTY;
-        ItemStack sourceStack = sourceSlot.getItem();
+        if (sourceSlot == null || !sourceSlot.hasStack()) return ItemStack.EMPTY;
+        ItemStack sourceStack = sourceSlot.getStack();
         ItemStack copyOfSourceStack = sourceStack.copy();
 
         if (pIndex < VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT) {
-            if (!moveItemStackTo(sourceStack, TE_INVENTORY_FIRST_SLOT_INDEX, TE_INVENTORY_FIRST_SLOT_INDEX + TE_INVENTORY_SLOT_COUNT, false)) {
+            if (!insertItem(sourceStack, TE_INVENTORY_FIRST_SLOT_INDEX, TE_INVENTORY_FIRST_SLOT_INDEX + TE_INVENTORY_SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
         } else if (pIndex < TE_INVENTORY_FIRST_SLOT_INDEX + TE_INVENTORY_SLOT_COUNT) {
-            if (!moveItemStackTo(sourceStack, VANILLA_FIRST_SLOT_INDEX, VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT, false)) {
+            if (!insertItem(sourceStack, VANILLA_FIRST_SLOT_INDEX, VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT, false)) {
                 return ItemStack.EMPTY;
             }
         } else {
@@ -82,20 +106,20 @@ public class ItemBrewingStationMenu extends AbstractContainerMenu {
             return ItemStack.EMPTY;
         }
         if (sourceStack.getCount() == 0) {
-            sourceSlot.set(ItemStack.EMPTY);
+            sourceSlot.setStackNoCallbacks(ItemStack.EMPTY);
         } else {
-            sourceSlot.setChanged();
+            sourceSlot.markDirty();
         }
-        sourceSlot.onTake(player, sourceStack);
+        sourceSlot.onTakeItem(player, sourceStack);
         return copyOfSourceStack;
     }
 
     @Override
-    public boolean stillValid(Player player) {
-        return stillValid(ContainerLevelAccess.create(level, blockEntity.getBlockPos()), player, EasyBrewing.ITEM_BREWING_STATION);
+    public boolean canUse(PlayerEntity player) {
+        return canUse(ScreenHandlerContext.create(level, blockEntity.getPos()), player, EasyBrewing.ITEM_BREWING_STATION);
     }
 
-    private void addPlayerInventory(Inventory playerInventory) {
+    private void addPlayerInventory(PlayerInventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int l = 0; l < 9; ++l) {
                 this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 8 + l * 18, 84 + i * 18));
@@ -103,7 +127,7 @@ public class ItemBrewingStationMenu extends AbstractContainerMenu {
         }
     }
 
-    private void addPlayerHotbar(Inventory playerInventory) {
+    private void addPlayerHotbar(PlayerInventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
             this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 142));
         }

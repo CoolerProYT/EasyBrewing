@@ -1,11 +1,15 @@
 package com.coolerpromc.easybrewing.inventory;
 
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
 
-public class OutputItemStackHandler extends SimpleContainer {
+public class OutputItemStackHandler extends SimpleInventory {
+    public OutputItemStackHandler(){
+        super(1);
+    }
+
     @Override
-    public boolean canPlaceItem(int i, ItemStack itemStack) {
+    public boolean canInsert(ItemStack stack) {
         return false;
     }
 }

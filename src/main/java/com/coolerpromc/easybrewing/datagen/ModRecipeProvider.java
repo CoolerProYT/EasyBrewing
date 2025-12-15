@@ -4,104 +4,103 @@ import com.coolerpromc.easybrewing.EasyBrewing;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.Items;
-
+import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.book.RecipeCategory;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.ItemTags;
 import java.util.concurrent.CompletableFuture;
 
 public class ModRecipeProvider extends FabricRecipeProvider {
-    public ModRecipeProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+    public ModRecipeProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registries) {
         super(output, registries);
     }
 
     @Override
-    public void buildRecipes(RecipeOutput recipeOutput) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.ITEM_BREWING_STATION.asItem(), 1)
+    public void generate(RecipeExporter recipeOutput) {
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.ITEM_BREWING_STATION.asItem(), 1)
                 .pattern(" D ")
                 .pattern("DBD")
                 .pattern("SSS")
-                .define('D', ConventionalItemTags.DIAMOND_GEMS)
-                .define('B', Items.BLAZE_POWDER)
-                .define('S', ItemTags.STONE_CRAFTING_MATERIALS)
-                .unlockedBy("has_diamond", has(ConventionalItemTags.DIAMOND_GEMS))
-                .unlockedBy(getHasName(Items.BLAZE_POWDER), has(Items.BLAZE_POWDER))
-                .unlockedBy("has_stone_material", has(ItemTags.STONE_CRAFTING_MATERIALS))
-                .save(recipeOutput);
+                .input('D', ConventionalItemTags.DIAMOND_GEMS)
+                .input('B', Items.BLAZE_POWDER)
+                .input('S', ItemTags.STONE_CRAFTING_MATERIALS)
+                .criterion("has_diamond", conditionsFromTag(ConventionalItemTags.DIAMOND_GEMS))
+                .criterion(hasItem(Items.BLAZE_POWDER), conditionsFromItem(Items.BLAZE_POWDER))
+                .criterion("has_stone_material", conditionsFromTag(ItemTags.STONE_CRAFTING_MATERIALS))
+                .offerTo(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.UPGRADE_BASE, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.UPGRADE_BASE, 1)
                 .pattern("IPI")
                 .pattern("PBP")
                 .pattern("IPI")
-                .define('I', ConventionalItemTags.IRON_INGOTS)
-                .define('P', Items.PAPER)
-                .define('B', Items.BLAZE_POWDER)
-                .unlockedBy("has_iron_ingot", has(ConventionalItemTags.IRON_INGOTS))
-                .unlockedBy("has_paper", has(Items.PAPER))
-                .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
-                .save(recipeOutput);
+                .input('I', ConventionalItemTags.IRON_INGOTS)
+                .input('P', Items.PAPER)
+                .input('B', Items.BLAZE_POWDER)
+                .criterion("has_iron_ingot", conditionsFromTag(ConventionalItemTags.IRON_INGOTS))
+                .criterion("has_paper", conditionsFromItem(Items.PAPER))
+                .criterion("has_blaze_powder", conditionsFromItem(Items.BLAZE_POWDER))
+                .offerTo(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_1, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_1, 1)
                 .pattern("GRG")
                 .pattern("RSR")
                 .pattern("GRG")
-                .define('G', ConventionalItemTags.GOLD_INGOTS)
-                .define('R', ConventionalItemTags.REDSTONE_DUSTS)
-                .define('S', EasyBrewing.UPGRADE_BASE)
-                .unlockedBy("has_gold_ingot", has(ConventionalItemTags.GOLD_INGOTS))
-                .unlockedBy("has_redstone_dust", has(ConventionalItemTags.REDSTONE_DUSTS))
-                .unlockedBy(getHasName(EasyBrewing.UPGRADE_BASE), has(EasyBrewing.UPGRADE_BASE))
-                .save(recipeOutput);
+                .input('G', ConventionalItemTags.GOLD_INGOTS)
+                .input('R', ConventionalItemTags.REDSTONE_DUSTS)
+                .input('S', EasyBrewing.UPGRADE_BASE)
+                .criterion("has_gold_ingot", conditionsFromTag(ConventionalItemTags.GOLD_INGOTS))
+                .criterion("has_redstone_dust", conditionsFromTag(ConventionalItemTags.REDSTONE_DUSTS))
+                .criterion(hasItem(EasyBrewing.UPGRADE_BASE), conditionsFromItem(EasyBrewing.UPGRADE_BASE))
+                .offerTo(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_2, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_2, 1)
                 .pattern("LRL")
                 .pattern("RSR")
                 .pattern("LRL")
-                .define('L', ConventionalItemTags.STORAGE_BLOCKS_LAPIS)
-                .define('R', ConventionalItemTags.REDSTONE_DUSTS)
-                .define('S', EasyBrewing.SPEED_UPGRADE_1)
-                .unlockedBy("has_lapis_lazuli_block", has(ConventionalItemTags.STORAGE_BLOCKS_LAPIS))
-                .unlockedBy("has_redstone_dust", has(ConventionalItemTags.REDSTONE_DUSTS))
-                .unlockedBy(getHasName(EasyBrewing.SPEED_UPGRADE_1), has(EasyBrewing.SPEED_UPGRADE_1))
-                .save(recipeOutput);
+                .input('L', ConventionalItemTags.STORAGE_BLOCKS_LAPIS)
+                .input('R', ConventionalItemTags.REDSTONE_DUSTS)
+                .input('S', EasyBrewing.SPEED_UPGRADE_1)
+                .criterion("has_lapis_lazuli_block", conditionsFromTag(ConventionalItemTags.STORAGE_BLOCKS_LAPIS))
+                .criterion("has_redstone_dust", conditionsFromTag(ConventionalItemTags.REDSTONE_DUSTS))
+                .criterion(hasItem(EasyBrewing.SPEED_UPGRADE_1), conditionsFromItem(EasyBrewing.SPEED_UPGRADE_1))
+                .offerTo(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_3, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_3, 1)
                 .pattern("BRB")
                 .pattern("RSR")
                 .pattern("BRB")
-                .define('B', ConventionalItemTags.STORAGE_BLOCKS_REDSTONE)
-                .define('R', ConventionalItemTags.REDSTONE_DUSTS)
-                .define('S', EasyBrewing.SPEED_UPGRADE_2)
-                .unlockedBy("has_redstone_block", has(ConventionalItemTags.STORAGE_BLOCKS_REDSTONE))
-                .unlockedBy("has_redstone_dust", has(ConventionalItemTags.REDSTONE_DUSTS))
-                .unlockedBy(getHasName(EasyBrewing.SPEED_UPGRADE_2), has(EasyBrewing.SPEED_UPGRADE_2))
-                .save(recipeOutput);
+                .input('B', ConventionalItemTags.STORAGE_BLOCKS_REDSTONE)
+                .input('R', ConventionalItemTags.REDSTONE_DUSTS)
+                .input('S', EasyBrewing.SPEED_UPGRADE_2)
+                .criterion("has_redstone_block", conditionsFromTag(ConventionalItemTags.STORAGE_BLOCKS_REDSTONE))
+                .criterion("has_redstone_dust", conditionsFromTag(ConventionalItemTags.REDSTONE_DUSTS))
+                .criterion(hasItem(EasyBrewing.SPEED_UPGRADE_2), conditionsFromItem(EasyBrewing.SPEED_UPGRADE_2))
+                .offerTo(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.AMOUNT_UPGRADE_1, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.AMOUNT_UPGRADE_1, 1)
                 .pattern("GBG")
                 .pattern("BUB")
                 .pattern("GBG")
-                .define('G', Items.GLASS_BOTTLE)
-                .define('B', Items.BLAZE_POWDER)
-                .define('U', EasyBrewing.UPGRADE_BASE)
-                .unlockedBy("has_glass_bottle", has(Items.GLASS_BOTTLE))
-                .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
-                .unlockedBy(getHasName(EasyBrewing.UPGRADE_BASE), has(EasyBrewing.UPGRADE_BASE))
-                .save(recipeOutput);
+                .input('G', Items.GLASS_BOTTLE)
+                .input('B', Items.BLAZE_POWDER)
+                .input('U', EasyBrewing.UPGRADE_BASE)
+                .criterion("has_glass_bottle", conditionsFromItem(Items.GLASS_BOTTLE))
+                .criterion("has_blaze_powder", conditionsFromItem(Items.BLAZE_POWDER))
+                .criterion(hasItem(EasyBrewing.UPGRADE_BASE), conditionsFromItem(EasyBrewing.UPGRADE_BASE))
+                .offerTo(recipeOutput);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.AMOUNT_UPGRADE_2, 1)
+        ShapedRecipeJsonBuilder.create(RecipeCategory.MISC, EasyBrewing.AMOUNT_UPGRADE_2, 1)
                 .pattern("GDG")
                 .pattern("DAD")
                 .pattern("GDG")
-                .define('G', Items.GLASS_BOTTLE)
-                .define('D', ConventionalItemTags.DIAMOND_GEMS)
-                .define('A', EasyBrewing.AMOUNT_UPGRADE_1)
-                .unlockedBy("has_glass_bottle", has(Items.GLASS_BOTTLE))
-                .unlockedBy("has_diamond", has(ConventionalItemTags.DIAMOND_GEMS))
-                .unlockedBy(getHasName(EasyBrewing.AMOUNT_UPGRADE_1), has(EasyBrewing.AMOUNT_UPGRADE_1))
-                .save(recipeOutput);
+                .input('G', Items.GLASS_BOTTLE)
+                .input('D', ConventionalItemTags.DIAMOND_GEMS)
+                .input('A', EasyBrewing.AMOUNT_UPGRADE_1)
+                .criterion("has_glass_bottle", conditionsFromItem(Items.GLASS_BOTTLE))
+                .criterion("has_diamond", conditionsFromTag(ConventionalItemTags.DIAMOND_GEMS))
+                .criterion(hasItem(EasyBrewing.AMOUNT_UPGRADE_1), conditionsFromItem(EasyBrewing.AMOUNT_UPGRADE_1))
+                .offerTo(recipeOutput);
     }
 }

@@ -3,45 +3,49 @@ package com.coolerpromc.easybrewing.block;
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ItemActionResult;
+import net.minecraft.util.function.BooleanBiFunction;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ItemBrewingStationBlock extends BaseEntityBlock {
-    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
+public class ItemBrewingStationBlock extends BlockWithEntity {
+    public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     private static final VoxelShape SHAPE_NORTH = Stream.of(
-            Block.box(7.5, 0, 7, 8.5, 16, 8),
-            Block.box(4.5, 0, 0, 11.5, 16, 7),
-            Block.box(0, 0, 7, 16, 16, 15.5)
-    ).reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
+            Block.createCuboidShape(7.5, 0, 7, 8.5, 16, 8),
+            Block.createCuboidShape(4.5, 0, 0, 11.5, 16, 7),
+            Block.createCuboidShape(0, 0, 7, 16, 16, 15.5)
+    ).reduce((v1, v2) -> VoxelShapes.combineAndSimplify(v1, v2, BooleanBiFunction.OR)).get();
     private static final Map<Direction, VoxelShape> SHAPES = new EnumMap<>(Direction.class);
 
     static {
@@ -51,42 +55,42 @@ public class ItemBrewingStationBlock extends BaseEntityBlock {
         SHAPES.put(Direction.WEST, rotateShape(Direction.NORTH, Direction.WEST, SHAPE_NORTH));
     }
 
-    public ItemBrewingStationBlock(Properties properties) {
+    public ItemBrewingStationBlock(Settings properties) {
         super(properties);
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+    protected BlockRenderType getRenderType(BlockState state) {
+        return BlockRenderType.MODEL;
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return simpleCodec(ItemBrewingStationBlock::new);
+    protected MapCodec<? extends BlockWithEntity> getCodec() {
+        return createCodec(ItemBrewingStationBlock::new);
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+    public @Nullable BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new ItemBrewingStationBE(blockPos, blockState);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (player instanceof ServerPlayer serverPlayer){
-            if (level.getBlockEntity(pos) instanceof MenuProvider be){
-                serverPlayer.openMenu(be);
+    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hitResult) {
+        if (player instanceof ServerPlayerEntity serverPlayer){
+            if (level.getBlockEntity(pos) instanceof NamedScreenHandlerFactory be){
+                serverPlayer.openHandledScreen(be);
             }
         }
-        return ItemInteractionResult.sidedSuccess(level.isClientSide());
+        return ItemActionResult.success(level.isClient());
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return createTickerHelper(blockEntityType, EasyBrewing.ITEM_BREWING_STATION_BE, (level1, blockPos, blockState, be) -> be.tick(level1, blockPos, blockState));
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return validateTicker(blockEntityType, EasyBrewing.ITEM_BREWING_STATION_BE, (level1, blockPos, blockState, be) -> be.tick(level1, blockPos, blockState));
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+    public void randomDisplayTick(BlockState state, World level, BlockPos pos, Random random) {
         double d0 = (double)pos.getX() + 0.4 + (double)random.nextFloat() * 0.2;
         double d1 = (double)pos.getY() + 0.7 + (double)random.nextFloat() * 0.3;
         double d2 = (double)pos.getZ() + 0.4 + (double)random.nextFloat() * 0.2;
@@ -94,57 +98,57 @@ public class ItemBrewingStationBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    public @Nullable BlockState getPlacementState(ItemPlacementContext context) {
+        return this.getDefaultState().with(FACING, context.getHorizontalPlayerFacing().getOpposite());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
         builder.add(FACING);
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    protected BlockState rotate(BlockState state, BlockRotation rotation) {
+        return state.with(FACING, rotation.rotate(state.get(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+    protected BlockState mirror(BlockState state, BlockMirror mirror) {
+        return state.rotate(mirror.getRotation(state.get(FACING)));
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    protected void onStateReplaced(BlockState state, World level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (state.getBlock() != newState.getBlock()){
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof ItemBrewingStationBE be){
                 be.drops();
             }
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
+        super.onStateReplaced(state, level, pos, newState, movedByPiston);
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPES.get(state.getValue(FACING));
+    protected VoxelShape getOutlineShape(BlockState state, BlockView level, BlockPos pos, ShapeContext context) {
+        return SHAPES.get(state.get(FACING));
     }
 
     private static VoxelShape rotateShape(Direction from, Direction to, VoxelShape shape) {
-        VoxelShape[] buffer = new VoxelShape[]{shape, Shapes.empty()};
+        VoxelShape[] buffer = new VoxelShape[]{shape, VoxelShapes.empty()};
 
-        int times = (to.get2DDataValue() - from.get2DDataValue() + 4) % 4;
+        int times = (to.getHorizontal() - from.getHorizontal() + 4) % 4;
 
         for (int i = 0; i < times; i++) {
-            buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                buffer[1] = Shapes.or(buffer[1],
-                        Shapes.box(
+            buffer[0].forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                buffer[1] = VoxelShapes.union(buffer[1],
+                        VoxelShapes.cuboid(
                                 1 - maxZ, minY, minX,
                                 1 - minZ, maxY, maxX
                         ));
             });
             buffer[0] = buffer[1];
-            buffer[1] = Shapes.empty();
+            buffer[1] = VoxelShapes.empty();
         }
 
         return buffer[0];

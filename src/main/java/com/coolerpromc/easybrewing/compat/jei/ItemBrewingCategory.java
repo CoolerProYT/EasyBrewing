@@ -10,9 +10,9 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<ItemBrewingRecipe> {
@@ -24,13 +24,13 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
     }
 
     @Override
-    public Component getTitle() {
-        return Component.translatable("block.easybrewing.item_brewing_station");
+    public Text getTitle() {
+        return Text.translatable("block.easybrewing.item_brewing_station");
     }
 
     @Override
     public @Nullable IDrawable getIcon() {
-        return helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, EasyBrewing.ITEM_BREWING_STATION.asItem().getDefaultInstance());
+        return helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, EasyBrewing.ITEM_BREWING_STATION.asItem().getDefaultStack());
     }
 
     @Override
@@ -51,8 +51,8 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
     }
 
     @Override
-    public void draw(ItemBrewingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        ResourceLocation ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
-        guiGraphics.blit(ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60);
+    public void draw(ItemBrewingRecipe recipe, IRecipeSlotsView recipeSlotsView, DrawContext guiGraphics, double mouseX, double mouseY) {
+        Identifier ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
+        guiGraphics.drawTexture(ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60);
     }
 }

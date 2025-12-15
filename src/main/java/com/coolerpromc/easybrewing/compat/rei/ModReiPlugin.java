@@ -13,9 +13,8 @@ import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.ItemStack;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,10 +30,10 @@ public class ModReiPlugin implements REIClientPlugin {
         List<ItemBrewingRecipe> recipes = new ArrayList<>(PotionHelper.registerPotions().stream().map(iJeiBrewingRecipe -> {
             ItemStack output = iJeiBrewingRecipe.output.copy();
             output.setCount(PotionCountSyncS2CPacket.POTION_COUNT);
-            return new ItemBrewingRecipe(Arrays.stream(iJeiBrewingRecipe.ingredient.getItems()).map(ItemStack::copy).toList(), Arrays.stream(iJeiBrewingRecipe.input.getItems()).map(ItemStack::copy).peek(stack -> stack.setCount(PotionCountSyncS2CPacket.POTION_COUNT)).toList(), output);
+            return new ItemBrewingRecipe(Arrays.stream(iJeiBrewingRecipe.ingredient.getMatchingStacks()).map(ItemStack::copy).toList(), Arrays.stream(iJeiBrewingRecipe.input.getMatchingStacks()).map(ItemStack::copy).peek(stack -> stack.setCount(PotionCountSyncS2CPacket.POTION_COUNT)).toList(), output);
         }).toList());
         if (FabricLoader.getInstance().isModLoaded("cobblemon")){
-            CobblemonRecipeViewer.addRecipes(recipes, Minecraft.getInstance().level);
+            CobblemonRecipeViewer.addRecipes(recipes, MinecraftClient.getInstance().world);
         }
         recipes.forEach(recipe -> registry.add(new ItemBrewingDisplay(recipe)));
     }

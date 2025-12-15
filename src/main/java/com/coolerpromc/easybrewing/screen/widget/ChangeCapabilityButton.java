@@ -1,43 +1,42 @@
 package com.coolerpromc.easybrewing.screen.widget;
 
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
-public class ChangeCapabilityButton extends Button {
+public class ChangeCapabilityButton extends ButtonWidget {
     private final Direction direction;
     private ItemBrewingStationBE.Slot slot;
 
-    public ChangeCapabilityButton(int x, int y, int width, int height, Component message, OnPress onPress, Direction direction, ItemBrewingStationBE.Slot slot) {
+    public ChangeCapabilityButton(int x, int y, int width, int height, Text message, PressAction onPress, Direction direction, ItemBrewingStationBE.Slot slot) {
         super(x, y, width, height, message, onPress, Supplier::get);
         this.direction = direction;
         this.slot = slot;
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.blitSprite(ResourceLocation.withDefaultNamespace("widget/button"), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    protected void renderWidget(DrawContext guiGraphics, int mouseX, int mouseY, float partialTick) {
+        guiGraphics.drawGuiTexture(Identifier.ofVanilla("widget/button"), this.getX(), this.getY(), this.getWidth(), this.getHeight());
 
         guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + 1, slot.color);
         guiGraphics.fill(this.getX(), this.getY() + this.getHeight() - 1, this.getX() + this.getWidth(), this.getY() + this.getHeight(), slot.color);
         guiGraphics.fill(this.getX(), this.getY(), this.getX() + 1, this.getY() + this.getHeight(), slot.color);
         guiGraphics.fill(this.getX() + this.getWidth() - 1, this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), slot.color);
 
-        if (this.isHovered){
-            List<Component> tooltips = new ArrayList<>();
-            tooltips.add(Component.translatable("screen.easybrewing.direction_" + direction.getName()));
-            tooltips.add(Component.translatable("screen.easybrewing.change_slot").withStyle(ChatFormatting.GRAY));
-            guiGraphics.renderTooltip(Minecraft.getInstance().font, tooltips, Optional.empty(), mouseX, mouseY);
+        if (this.hovered){
+            List<Text> tooltips = new ArrayList<>();
+            tooltips.add(Text.translatable("screen.easybrewing.direction_" + direction.getName()));
+            tooltips.add(Text.translatable("screen.easybrewing.change_slot").formatted(Formatting.GRAY));
+            guiGraphics.drawTooltip(MinecraftClient.getInstance().textRenderer, tooltips, Optional.empty(), mouseX, mouseY);
         }
     }
 

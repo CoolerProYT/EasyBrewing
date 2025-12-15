@@ -10,8 +10,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.network.chat.Component;
-
+import net.minecraft.text.Text;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,8 +21,8 @@ public class ItemBrewingCategory implements DisplayCategory<ItemBrewingDisplay> 
     }
 
     @Override
-    public Component getTitle() {
-        return Component.translatable("block.easybrewing.item_brewing_station");
+    public Text getTitle() {
+        return Text.translatable("block.easybrewing.item_brewing_station");
     }
 
     @Override

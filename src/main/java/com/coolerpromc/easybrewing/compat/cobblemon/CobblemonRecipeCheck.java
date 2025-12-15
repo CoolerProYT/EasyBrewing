@@ -7,25 +7,24 @@ import com.coolerpromc.easybrewing.config.CommonConfig;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Containers;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
-
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.ItemScatterer;
+import net.minecraft.world.World;
 import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 public class CobblemonRecipeCheck {
-    public static Optional<RecipeHolder<BrewingStandRecipe>> getRecipe(Level level, ItemStack inputStack, ItemStack potionStack){
+    public static Optional<RecipeEntry<BrewingStandRecipe>> getRecipe(World level, ItemStack inputStack, ItemStack potionStack){
         if (FabricLoader.getInstance().isModLoaded("cobblemon")){
             try{
-                RecipeType<BrewingStandRecipe> brewingStandType = (RecipeType<BrewingStandRecipe>) BuiltInRegistries.RECIPE_TYPE.get(ResourceLocation.fromNamespaceAndPath("cobblemon", "brewing_stand"));
+                RecipeType<BrewingStandRecipe> brewingStandType = (RecipeType<BrewingStandRecipe>) Registries.RECIPE_TYPE.get(Identifier.of("cobblemon", "brewing_stand"));
                 if (brewingStandType != null){
-                    return level.getRecipeManager().getRecipeFor(brewingStandType, new BrewingStandInput(inputStack, List.of(potionStack, potionStack, potionStack)), level);
+                    return level.getRecipeManager().getFirstMatch(brewingStandType, new BrewingStandInput(inputStack, List.of(potionStack, potionStack, potionStack)), level);
                 }
             }
             catch (Exception e){
@@ -36,32 +35,32 @@ public class CobblemonRecipeCheck {
     }
 
     public static boolean hasRecipe(ItemBrewingStationBE be){
-        Optional<RecipeHolder<BrewingStandRecipe>> optional = getRecipe(be.getLevel(), be.inputHandler.getItem(0), be.potionHandler.getItem(0));
+        Optional<RecipeEntry<BrewingStandRecipe>> optional = getRecipe(be.getWorld(), be.inputHandler.getStack(0), be.potionHandler.getStack(0));
         return optional.filter(recipeHolder -> be.hasFuel() && canInsertIntoOutputSlot(be, recipeHolder) && hasEnoughInput(be)).isPresent();
     }
 
     public static void craft(ItemBrewingStationBE be){
-        Optional<RecipeHolder<BrewingStandRecipe>> recipe = getRecipe(be.getLevel(), be.inputHandler.getItem(0), be.potionHandler.getItem(0));
+        Optional<RecipeEntry<BrewingStandRecipe>> recipe = getRecipe(be.getWorld(), be.inputHandler.getStack(0), be.potionHandler.getStack(0));
         if (recipe.isPresent()){
-            RecipeHolder<BrewingStandRecipe> recipeHolder = recipe.get();
-            ItemStack ingredient = be.inputHandler.getItem(0);
+            RecipeEntry<BrewingStandRecipe> recipeHolder = recipe.get();
+            ItemStack ingredient = be.inputHandler.getStack(0);
             ItemStack output = recipeHolder.value().getResult().copy();
 
             output.setCount(CommonConfig.CONFIG.cobblemonPotionCount + be.additionalAmount);
 
             if (!ingredient.getRecipeRemainder().isEmpty()) {
                 ItemStack leftover = ingredient.getRecipeRemainder();
-                ingredient.shrink(1);
+                ingredient.decrement(1);
                 if (ingredient.isEmpty()) {
                     ingredient = leftover;
                 } else {
-                    Containers.dropItemStack(be.getLevel(), be.getBlockPos().getX(), be.getBlockPos().getY(), be.getBlockPos().getZ(), leftover);
+                    ItemScatterer.spawn(be.getWorld(), be.getPos().getX(), be.getPos().getY(), be.getPos().getZ(), leftover);
                 }
             } else {
-                ingredient.shrink(1);
+                ingredient.decrement(1);
             }
 
-            be.inputHandler.setItem(0, ingredient);
+            be.inputHandler.setStack(0, ingredient);
             try(Transaction tx = Transaction.openOuter()){
                 be.potionStorage.extract(be.potionStorage.getSlot(0).getResource(), CommonConfig.CONFIG.cobblemonPotionCount + be.additionalAmount, tx);
                 tx.commit();
@@ -72,15 +71,15 @@ public class CobblemonRecipeCheck {
             }
             be.fuel--;
 
-            be.setChanged();
+            be.markDirty();
         }
     }
 
     private static boolean hasEnoughInput(ItemBrewingStationBE be){
-        return be.potionHandler.getItem(0).getCount() >= CommonConfig.CONFIG.cobblemonPotionCount + be.additionalAmount;
+        return be.potionHandler.getStack(0).getCount() >= CommonConfig.CONFIG.cobblemonPotionCount + be.additionalAmount;
     }
 
-    private static boolean canInsertIntoOutputSlot(ItemBrewingStationBE be, RecipeHolder<BrewingStandRecipe> recipeHolder){
+    private static boolean canInsertIntoOutputSlot(ItemBrewingStationBE be, RecipeEntry<BrewingStandRecipe> recipeHolder){
         ItemStack output = recipeHolder.value().getResult();
         output.setCount(CommonConfig.CONFIG.cobblemonPotionCount + be.additionalAmount);
         try(Transaction tx = Transaction.openOuter()){
