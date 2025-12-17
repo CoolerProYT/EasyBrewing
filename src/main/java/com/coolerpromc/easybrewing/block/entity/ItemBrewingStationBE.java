@@ -2,7 +2,6 @@ package com.coolerpromc.easybrewing.block.entity;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonBottleIngredientCheck;
-import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonRecipeCheck;
 import com.coolerpromc.easybrewing.config.CommonConfig;
 import com.coolerpromc.easybrewing.inventory.OutputItemStackHandler;
 import com.coolerpromc.easybrewing.item.AmountUpgradeItem;
@@ -13,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -38,9 +36,13 @@ import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,9 +52,9 @@ import java.util.Map;
 @SuppressWarnings("ConstantConditions")
 public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     public final ContainerData data;
-    public final ItemStackHandler fuelHandler = new ItemStackHandler(1){
+    public final ItemStacksResourceHandler fuelHandler = new ItemStacksResourceHandler(1){
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack prevContent) {
             setChanged();
             if (!level.isClientSide()){
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
@@ -60,13 +62,13 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return stack.is(Items.BLAZE_POWDER);
+        public boolean isValid(int index, ItemResource resource) {
+            return resource.is(Items.BLAZE_POWDER);
         }
     };
-    public final ItemStackHandler potionHandler = new ItemStackHandler(1){
+    public final ItemStacksResourceHandler potionHandler = new ItemStacksResourceHandler(1){
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack prevContent) {
             setChanged();
             if (!level.isClientSide()){
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
@@ -74,36 +76,31 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         }
 
         @Override
-        protected int getStackLimit(int slot, ItemStack stack) {
-            return stack.getMaxStackSize();
-        }
-
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return isValidPotion(stack);
+        public boolean isValid(int index, ItemResource resource) {
+            return isValidPotion(resource);
         }
     };
-    public final ItemStackHandler inputHandler = new ItemStackHandler(1){
+    public final ItemStacksResourceHandler inputHandler = new ItemStacksResourceHandler(1){
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack prevContent) {
             setChanged();
             if (!level.isClientSide()){
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
             }
         }
     };
-    public final OutputItemStackHandler outputHandler = new OutputItemStackHandler(){
+    public final OutputItemStackHandler outputHandler = new OutputItemStackHandler(1){
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack prevContent) {
             setChanged();
             if (!level.isClientSide()){
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
             }
         }
     };
-    public final ItemStackHandler upgradeHandler = new ItemStackHandler(2){
+    public final ItemStacksResourceHandler upgradeHandler = new ItemStacksResourceHandler(2){
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack prevContent) {
             setChanged();
             if (!level.isClientSide()){
                 if (slot == 0){
@@ -117,11 +114,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            if (slot == 1){
-                return stack.getItem() instanceof AmountUpgradeItem;
+        public boolean isValid(int index, ItemResource resource) {
+            if (index == 1){
+                return resource.getItem() instanceof AmountUpgradeItem;
             }
-            return stack.getItem() instanceof SpeedUpgradeItem;
+            return resource.getItem() instanceof SpeedUpgradeItem;
         }
     };
 
@@ -189,49 +186,48 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put("fuelHandler", fuelHandler.serializeNBT(registries));
-        tag.put("potionHandler", potionHandler.serializeNBT(registries));
-        tag.put("inputHandler", inputHandler.serializeNBT(registries));
-        tag.put("outputHandler", outputHandler.serializeNBT(registries));
-        tag.put("upgradeHandler", upgradeHandler.serializeNBT(registries));
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        fuelHandler.serialize(output.child("fuelHandler"));
+        potionHandler.serialize(output.child("potionHandler"));
+        inputHandler.serialize(output.child("inputHandler"));
+        outputHandler.serialize(output.child("outputHandler"));
+        upgradeHandler.serialize(output.child("upgradeHandler"));
 
-        tag.putInt("progress", progress);
-        tag.putInt("maxProgress", maxProgress);
-        tag.putInt("fuel", fuel);
-        tag.putFloat("multiplier", multiplier);
-        tag.putInt("additionalAmount", additionalAmount);
-        tag.put("capabilityBySide", ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow());
+        output.putInt("progress", progress);
+        output.putInt("maxProgress", maxProgress);
+        output.putInt("fuel", fuel);
+        output.putFloat("multiplier", multiplier);
+        output.putInt("additionalAmount", additionalAmount);
+        output.store("capabilityBySide", ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC), capabilityBySide);
     }
 
     @Override
-    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.loadAdditional(tag, registries);
-        fuelHandler.deserializeNBT(registries, tag.getCompound("fuelHandler"));
-        potionHandler.deserializeNBT(registries, tag.getCompound("potionHandler"));
-        inputHandler.deserializeNBT(registries, tag.getCompound("inputHandler"));
-        outputHandler.deserializeNBT(registries, tag.getCompound("outputHandler"));
-        upgradeHandler.deserializeNBT(registries, tag.getCompound("upgradeHandler"));
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        fuelHandler.deserialize(input.childOrEmpty("fuelHandler"));
+        potionHandler.deserialize(input.childOrEmpty("potionHandler"));
+        inputHandler.deserialize(input.childOrEmpty("inputHandler"));
+        outputHandler.deserialize(input.childOrEmpty("outputHandler"));
+        upgradeHandler.deserialize(input.childOrEmpty("upgradeHandler"));
 
-        progress = tag.getInt("progress");
-        maxProgress = tag.getInt("maxProgress");
-        fuel = tag.getInt("fuel");
-        multiplier = tag.getFloat("multiplier");
-        additionalAmount = tag.getInt("additionalAmount");
-        capabilityBySide = new HashMap<>(ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow());
+        progress = input.getIntOr("progress", 0);
+        maxProgress = input.getIntOr("maxProgress", 400);
+        fuel = input.getIntOr("fuel", 0);
+        multiplier = input.getFloatOr("multiplier", 1f);
+        additionalAmount = input.getIntOr("additionalAmount", 0);
+        capabilityBySide = new HashMap<>(input.read("capabilityBySide", ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC)).orElse(new HashMap<>()));
     }
 
     @Override
     public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
-        return tag;
+        return saveWithoutMetadata(registries);
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider lookupProvider) {
-        loadAdditional(tag, lookupProvider);
+    public void handleUpdateTag(ValueInput input) {
+        super.handleUpdateTag(input);
+        loadAdditional(input);
     }
 
     @Override
@@ -245,7 +241,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         handleFuel();
         checkUpgrade();
 
-        if (isBrewable(level.potionBrewing()) || (ModList.get().isLoaded("cobblemon") && CobblemonRecipeCheck.hasRecipe(this))){
+        if (isBrewable(level.potionBrewing()) || (ModList.get().isLoaded("cobblemon")/* && CobblemonRecipeCheck.hasRecipe(this)*/)){
             progress++;
             setChanged(level, pos, blockState);
 
@@ -253,9 +249,9 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
                 if (isBrewable(level.potionBrewing())){
                     doBrew(level.potionBrewing());
                 }
-                else if (ModList.get().isLoaded("cobblemon")){
+                /*else if (ModList.get().isLoaded("cobblemon")){
                     CobblemonRecipeCheck.craft(this);
-                }
+                }*/
                 level.playSound(null, pos, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1.0F, 1.0F);
                 progress = 0;
             }
@@ -270,7 +266,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
             additionalAmount = 0;
         }
         else{
-            if (CommonConfig.CONFIG.allowAmountUpgrade.get() && additionalAmount == 0 && upgradeHandler.getStackInSlot(1).getCount() > 0){
+            if (CommonConfig.CONFIG.allowAmountUpgrade.get() && additionalAmount == 0 && upgradeHandler.getAmountAsInt(1) > 0){
                 getAdditionalAmount();
             }
         }
@@ -278,7 +274,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
 
     private void handleUpgrade(){
         maxProgress = CommonConfig.CONFIG.processingTime.getAsInt();
-        ItemStack upgradeStack = upgradeHandler.getStackInSlot(0);
+        ItemStack upgradeStack = upgradeHandler.getResource(0).toStack(upgradeHandler.getAmountAsInt(0));
 
         if (!upgradeStack.isEmpty() && upgradeStack.getItem() instanceof SpeedUpgradeItem upgradeItem){
             float multiplier = upgradeItem.getSpeedMultiplier();
@@ -299,29 +295,33 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
 
     private void handleFuel(){
         if (fuel <= 0){
-            ItemStack fuelStack = fuelHandler.getStackInSlot(0);
+            ItemResource fuelStack = fuelHandler.getResource(0);
             if (fuelStack.is(Items.BLAZE_POWDER)){
-                fuel = 20;
-                fuelHandler.extractItem(0, 1, false);
+                try(Transaction tx = Transaction.openRoot()){
+                    if (fuelHandler.extract(0, fuelStack, 1, tx) == 1){
+                        fuel = 20;
+                        tx.commit();
+                    }
+                }
             }
         }
     }
 
     private boolean isBrewable(PotionBrewing potionBrewing) {
-        ItemStack ingredient = inputHandler.getStackInSlot(0);
+        ItemStack ingredient = inputHandler.getResource(0).toStack(inputHandler.getAmountAsInt(0));
         if (ingredient.isEmpty()) {
             return false;
         } else if (!potionBrewing.isIngredient(ingredient)) {
             return false;
         } else {
-            ItemStack potion = potionHandler.getStackInSlot(0);
+            ItemStack potion = potionHandler.getResource(0).toStack(inputHandler.getAmountAsInt(0));
             return !potion.isEmpty() && potionBrewing.hasMix(potion, ingredient) && hasEnoughInput() && canInsertIntoOutputSlot(potionBrewing) && hasFuel();
         }
     }
 
     public void getAdditionalAmount(){
-        if (CommonConfig.CONFIG.allowAmountUpgrade.get() && upgradeHandler.getStackInSlot(1).getItem() instanceof AmountUpgradeItem upgradeItem){
-            int effectiveUpgrade = Math.min(upgradeHandler.getStackInSlot(1).getCount(), CommonConfig.CONFIG.maxAmountUpgrade.get());
+        if (CommonConfig.CONFIG.allowAmountUpgrade.get() && upgradeHandler.getResource(1).getItem() instanceof AmountUpgradeItem upgradeItem){
+            int effectiveUpgrade = Math.min(upgradeHandler.getAmountAsInt(1), CommonConfig.CONFIG.maxAmountUpgrade.get());
             additionalAmount = upgradeItem.getAmount() * effectiveUpgrade;
         }
         else{
@@ -330,7 +330,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     private boolean hasEnoughInput(){
-        return potionHandler.getStackInSlot(0).getCount() >= CommonConfig.CONFIG.potionCount() + additionalAmount;
+        return potionHandler.getAmountAsInt(0) >= CommonConfig.CONFIG.potionCount() + additionalAmount;
     }
 
     public boolean hasFuel(){
@@ -338,20 +338,22 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     private boolean canInsertIntoOutputSlot(PotionBrewing potionbrewing){
-        ItemStack output = potionbrewing.mix(inputHandler.getStackInSlot(0), potionHandler.getStackInSlot(0));
+        ItemStack output = potionbrewing.mix(inputHandler.getResource(0).toStack(inputHandler.getAmountAsInt(0)), potionHandler.getResource(0).toStack(potionHandler.getAmountAsInt(0)));
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
-        return outputHandler.innerInsertItem(0, output, true).isEmpty();
+        try(Transaction tx = Transaction.openRoot()){
+            return outputHandler.innerInsert(0, ItemResource.of(output), output.getCount(), tx) == output.getCount();
+        }
     }
 
     private void doBrew(PotionBrewing potionbrewing) {
-        ItemStack ingredient = inputHandler.getStackInSlot(0);
-        ItemStack potion = potionHandler.getStackInSlot(0);
+        ItemStack ingredient = inputHandler.getResource(0).toStack(inputHandler.getAmountAsInt(0));
+        ItemStack potion = potionHandler.getResource(0).toStack(potionHandler.getAmountAsInt(0));
         ItemStack output = potionbrewing.mix(ingredient, potion);
 
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
 
-        if (ingredient.hasCraftingRemainingItem()) {
-            ItemStack leftover = ingredient.getCraftingRemainingItem();
+        if (!ingredient.getCraftingRemainder().isEmpty()) {
+            ItemStack leftover = ingredient.getCraftingRemainder();
             ingredient.shrink(1);
             if (ingredient.isEmpty()) {
                 ingredient = leftover;
@@ -362,13 +364,21 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
             ingredient.shrink(1);
         }
 
-        inputHandler.setStackInSlot(0, ingredient);
-        potionHandler.extractItem(0, CommonConfig.CONFIG.potionCount() + additionalAmount, false);
-        outputHandler.innerInsertItem(0, output, false);
+        inputHandler.set(0, ItemResource.of(ingredient), ingredient.getCount());
+        try(Transaction tx = Transaction.openRoot()){
+            if (potionHandler.extract(0, ItemResource.of(potion), CommonConfig.CONFIG.potionCount() + additionalAmount, tx) == CommonConfig.CONFIG.potionCount() + additionalAmount){
+                tx.commit();
+            }
+        }
+        try(Transaction tx = Transaction.openRoot()){
+            if (outputHandler.innerInsert(0, ItemResource.of(output), output.getCount(), tx) == output.getCount()){
+                tx.commit();
+            }
+        }
         fuel--;
     }
 
-    public @Nullable IItemHandler getCapability(@Nullable Direction direction) {
+    public @Nullable ResourceHandler<ItemResource> getCapability(@Nullable Direction direction) {
         if (direction == null) return null;
         Slot slot = capabilityBySide.get(direction);
 
@@ -390,18 +400,18 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         return capabilityBySide.get(direction);
     }
 
-    private boolean isValidPotion(ItemStack stack){
-        return stack.getItem() instanceof PotionItem || stack.is(Items.GLASS_BOTTLE) || (ModList.get().isLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, level));
+    private boolean isValidPotion(ItemResource resource){
+        return resource.getItem() instanceof PotionItem || resource.is(Items.GLASS_BOTTLE) || (ModList.get().isLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(resource, level));
     }
 
     public void drops(){
         SimpleContainer container = new SimpleContainer(
-                fuelHandler.getStackInSlot(0),
-                potionHandler.getStackInSlot(0),
-                inputHandler.getStackInSlot(0),
-                outputHandler.getStackInSlot(0),
-                upgradeHandler.getStackInSlot(0),
-                upgradeHandler.getStackInSlot(1)
+                fuelHandler.getResource(0).toStack(fuelHandler.getAmountAsInt(0)),
+                potionHandler.getResource(0).toStack(potionHandler.getAmountAsInt(0)),
+                inputHandler.getResource(0).toStack(inputHandler.getAmountAsInt(0)),
+                outputHandler.getResource(0).toStack(outputHandler.getAmountAsInt(0)),
+                upgradeHandler.getResource(0).toStack(upgradeHandler.getAmountAsInt(0)),
+                upgradeHandler.getResource(1).toStack(upgradeHandler.getAmountAsInt(1))
         );
 
         Containers.dropContents(level, getBlockPos(), container);
@@ -427,5 +437,10 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         public Slot next(){
             return values()[(ordinal() + 1) % values().length];
         }
+    }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        drops();
     }
 }

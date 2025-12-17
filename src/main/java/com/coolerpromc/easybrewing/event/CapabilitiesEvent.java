@@ -11,6 +11,6 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 public class CapabilitiesEvent {
     @SubscribeEvent
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, EasyBrewing.ITEM_BREWING_STATION_BE.get(), ItemBrewingStationBE::getCapability);
+        event.registerBlockEntity(Capabilities.Item.BLOCK, EasyBrewing.ITEM_BREWING_STATION_BE.get(), ItemBrewingStationBE::getCapability);
     }
 }

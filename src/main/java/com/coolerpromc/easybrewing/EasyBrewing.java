@@ -11,7 +11,7 @@ import com.coolerpromc.easybrewing.screen.ItemBrewingStationMenu;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -97,7 +97,7 @@ public class EasyBrewing {
     }
 
     public static <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(String name, BlockEntityType.BlockEntitySupplier<T> supplier, DeferredBlock<?> block){
-        return BLOCK_ENTITIES.register(name, () -> BlockEntityType.Builder.of(supplier, block.get()).build(null));
+        return BLOCK_ENTITIES.register(name, () -> new BlockEntityType<>(supplier, block.get()));
     }
 
     public static <T extends Item> DeferredItem<T> registerItem(String name, Function<Item.Properties, T> func){
@@ -108,7 +108,7 @@ public class EasyBrewing {
         return MENUS.register(name, () -> IMenuTypeExtension.create(factory));
     }
 
-    public static ResourceLocation id(String path){
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+    public static Identifier id(String path){
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 }

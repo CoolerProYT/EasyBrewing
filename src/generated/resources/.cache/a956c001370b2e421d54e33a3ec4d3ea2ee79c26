@@ -1,4 +1,4 @@
-// 1.21.1	2025-12-15T15:12:30.1753493	Recipes
+// 1.21.11	2025-12-17T22:42:22.991872	easybrewing recipe provider
 da630a52a2de8d0be2d7ba7608be48a33f86b473 data/easybrewing/advancement/recipes/misc/amount_upgrade_1.json
 925ae9ba4f47d56c72c821c8469e8107821627fc data/easybrewing/advancement/recipes/misc/amount_upgrade_2.json
 a4c419ca6225a2822d1ec933c274d24a92476a7f data/easybrewing/advancement/recipes/misc/item_brewing_station.json
@@ -6,10 +6,10 @@ a4c419ca6225a2822d1ec933c274d24a92476a7f data/easybrewing/advancement/recipes/mi
 e75d9806e8e0d4a4138924d86ad810a4d418b0c4 data/easybrewing/advancement/recipes/misc/speed_upgrade_2.json
 221df3be6f2ba5bb78a0f35ebbb49d5a7990bb13 data/easybrewing/advancement/recipes/misc/speed_upgrade_3.json
 044cf237fdae9a6abc344352e3b1f4e14ecd99d6 data/easybrewing/advancement/recipes/misc/upgrade_base.json
-e51a11dabe4d1da0144b0eb99d4d6679b19d0c30 data/easybrewing/recipe/amount_upgrade_1.json
-945ee90de24c13846759d8ced3c1ac79e363d844 data/easybrewing/recipe/amount_upgrade_2.json
-48c09a3ca70ac67dd83ca37c7e8185873df53c51 data/easybrewing/recipe/item_brewing_station.json
-070c6eacb54ea1a339fa05c63869b88206a9b873 data/easybrewing/recipe/speed_upgrade_1.json
-fe824d0fb341d61f615a2b0529e3d69210e1554c data/easybrewing/recipe/speed_upgrade_2.json
-ebad0a57750bf98727d33439dab7539ada661cbf data/easybrewing/recipe/speed_upgrade_3.json
-697aeff4a537092ed383d8641018ebd72fae274c data/easybrewing/recipe/upgrade_base.json
+9c6a5aef91debefd8dafe72388a52cb22cb0ccd7 data/easybrewing/recipe/amount_upgrade_1.json
+7a583739f41874c0dac6c0fce6e4a3240ecfede7 data/easybrewing/recipe/amount_upgrade_2.json
+b55f30c692b634543e9cf0c40a41759d569ec616 data/easybrewing/recipe/item_brewing_station.json
+21a7cb591b36207d8d94891b809b69cd6741d918 data/easybrewing/recipe/speed_upgrade_1.json
+6cf25eee85598f25c826f92240d5383d996770c1 data/easybrewing/recipe/speed_upgrade_2.json
+b2b77d79f5fe3c209831eba30f63d74778b93e2d data/easybrewing/recipe/speed_upgrade_3.json
+dfec58249afabc4e27c78a0eedee5ad1bbf99d29 data/easybrewing/recipe/upgrade_base.json

@@ -9,8 +9,8 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class ItemBrewingStationMenu extends AbstractContainerMenu {
     private final ItemBrewingStationBE blockEntity;
@@ -30,26 +30,26 @@ public class ItemBrewingStationMenu extends AbstractContainerMenu {
         addPlayerInventory(playerInventory);
         addPlayerHotbar(playerInventory);
 
-        IItemHandler fuelHandler = this.blockEntity.fuelHandler;
-        this.addSlot(new SlotItemHandler(fuelHandler, 0, 17, 17));
+        ItemStacksResourceHandler fuelHandler = this.blockEntity.fuelHandler;
+        this.addSlot(new ResourceHandlerSlot(fuelHandler, fuelHandler::set, 0, 17, 17));
 
-        IItemHandler potionHandler = this.blockEntity.potionHandler;
-        this.addSlot(new SlotItemHandler(potionHandler, 0, 79, 17));
+        ItemStacksResourceHandler potionHandler = this.blockEntity.potionHandler;
+        this.addSlot(new ResourceHandlerSlot(potionHandler, potionHandler::set, 0, 79, 17));
 
-        IItemHandler inputHandler = this.blockEntity.inputHandler;
-        this.addSlot(new SlotItemHandler(inputHandler, 0, 59, 37));
+        ItemStacksResourceHandler inputHandler = this.blockEntity.inputHandler;
+        this.addSlot(new ResourceHandlerSlot(inputHandler, inputHandler::set, 0, 59, 37));
 
-        IItemHandler outputHandler = this.blockEntity.outputHandler;
-        this.addSlot(new SlotItemHandler(outputHandler, 0, 79, 57){
+        ItemStacksResourceHandler outputHandler = this.blockEntity.outputHandler;
+        this.addSlot(new ResourceHandlerSlot(outputHandler, outputHandler::set, 0, 79, 57){
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
 
-        IItemHandler upgradeHandler = this.blockEntity.upgradeHandler;
-        this.addSlot(new SlotItemHandler(upgradeHandler, 0, 154, 6));
-        this.addSlot(new SlotItemHandler(upgradeHandler, 1, 154, 24));
+        ItemStacksResourceHandler upgradeHandler = this.blockEntity.upgradeHandler;
+        this.addSlot(new ResourceHandlerSlot(upgradeHandler, upgradeHandler::set, 0, 154, 6));
+        this.addSlot(new ResourceHandlerSlot(upgradeHandler, upgradeHandler::set, 1, 154, 24));
 
         addDataSlots(data);
     }

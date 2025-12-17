@@ -2,28 +2,25 @@ package com.coolerpromc.easybrewing.compat.jei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.compat.jei.recipe.ItemBrewingRecipe;
-import com.coolerpromc.easybrewing.network.packet.PotionCountSyncS2CPacket;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-
 public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<ItemBrewingRecipe> {
-    public static final RecipeType<ItemBrewingRecipe> TYPE = RecipeType.create(EasyBrewing.MODID, "item_brewing", ItemBrewingRecipe.class);
+    public static final IRecipeType<ItemBrewingRecipe> TYPE = IRecipeType.create(EasyBrewing.MODID, "item_brewing", ItemBrewingRecipe.class);
 
     @Override
-    public RecipeType<ItemBrewingRecipe> getRecipeType() {
+    public IRecipeType<ItemBrewingRecipe> getRecipeType() {
         return TYPE;
     }
 
@@ -41,7 +38,7 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
     public void setRecipe(IRecipeLayoutBuilder builder, ItemBrewingRecipe recipe, IFocusGroup focuses) {
         builder.addInputSlot(44, 2).addItemStacks(recipe.potion());
         builder.addInputSlot(24, 22).addItemStacks(recipe.input());
-        builder.addOutputSlot(44, 42).addItemStack(recipe.output());
+        builder.addOutputSlot(44, 42).add(recipe.output());
     }
 
     @Override
@@ -56,7 +53,7 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
 
     @Override
     public void draw(ItemBrewingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        ResourceLocation ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
-        guiGraphics.blit(ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60);
+        Identifier ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60, 256, 256);
     }
 }

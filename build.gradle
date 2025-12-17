@@ -56,7 +56,7 @@ neoForge {
         }
 
         data {
-            data()
+            clientData()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 
@@ -83,13 +83,13 @@ dependencies {
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
-    implementation "dev.architectury:architectury-neoforge:${architectury_version}"
-    implementation "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
+    compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
+    compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
-//    runtimeOnly  "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+    compileOnly  "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 
-    implementation "curse.maven:kotlin-for-forge-351264:6994056"
-    implementation "curse.maven:cobblemon-687131:7273151"
+    compileOnly "curse.maven:kotlin-for-forge-351264:6994056"
+    compileOnly "curse.maven:cobblemon-687131:7273151"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

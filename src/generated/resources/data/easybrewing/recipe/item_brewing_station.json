@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "minecraft:blaze_powder"
-    },
-    "D": {
-      "tag": "c:gems/diamond"
-    },
-    "S": {
-      "tag": "minecraft:stone_crafting_materials"
-    }
+    "B": "minecraft:blaze_powder",
+    "D": "#c:gems/diamond",
+    "S": "#minecraft:stone_crafting_materials"
   },
   "pattern": [
     " D ",

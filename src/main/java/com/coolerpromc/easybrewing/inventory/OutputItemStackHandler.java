@@ -1,45 +1,67 @@
 package com.coolerpromc.easybrewing.inventory;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public class OutputItemStackHandler extends ItemStackHandler {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class OutputItemStackHandler extends ItemStacksResourceHandler {
+    private final List<StackJournal> snapshotJournals;
+    
+    public OutputItemStackHandler(int size) {
+        super(size);
+        this.snapshotJournals = new ArrayList<>(this.stacks.size());
+
+        for(int i = 0; i < this.stacks.size(); ++i) {
+            this.snapshotJournals.add(new StackJournal(i));
+        }
+    }
+    
     @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
+    public boolean isValid(int index, ItemResource resource) {
         return false;
     }
 
-    public ItemStack innerInsertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) {
-            return ItemStack.EMPTY;
-        } else {
-            this.validateSlotIndex(slot);
-            ItemStack existing = this.stacks.get(slot);
-            int limit = this.getStackLimit(slot, stack);
-            if (!existing.isEmpty()) {
-                if (!ItemStack.isSameItemSameComponents(stack, existing)) {
-                    return stack;
-                }
-
-                limit -= existing.getCount();
+    public int innerInsert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        Objects.checkIndex(index, this.size());
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+        ItemStack currentStack = this.stacks.get(index);
+        int currentAmount = this.getAmountFrom(currentStack);
+        if ((currentAmount == 0 || this.matches(currentStack, resource))) {
+            int inserted = Math.min(amount, this.getCapacity(index, resource) - currentAmount);
+            if (inserted > 0) {
+                (this.snapshotJournals.get(index)).updateSnapshots(transaction);
+                this.stacks.set(index, this.getStackFrom(resource, currentAmount + inserted));
+                return inserted;
             }
+        }
 
-            if (limit <= 0) {
-                return stack;
-            } else {
-                boolean reachedLimit = stack.getCount() > limit;
-                if (!simulate) {
-                    if (existing.isEmpty()) {
-                        this.stacks.set(slot, reachedLimit ? stack.copyWithCount(limit) : stack);
-                    } else {
-                        existing.grow(reachedLimit ? limit : stack.getCount());
-                    }
+        return 0;
+    }
 
-                    this.onContentsChanged(slot);
-                }
+    private class StackJournal extends SnapshotJournal<ItemStack> {
+        private final int index;
 
-                return reachedLimit ? stack.copyWithCount(stack.getCount() - limit) : ItemStack.EMPTY;
-            }
+        private StackJournal(int index) {
+            this.index = index;
+        }
+
+        protected ItemStack createSnapshot() {
+            return OutputItemStackHandler.this.copyOf(OutputItemStackHandler.this.stacks.get(this.index));
+        }
+
+        protected void revertToSnapshot(ItemStack snapshot) {
+            OutputItemStackHandler.this.stacks.set(this.index, snapshot);
+        }
+
+        protected void onRootCommit(ItemStack originalState) {
+            OutputItemStackHandler.this.onContentsChanged(this.index, originalState);
         }
     }
 }

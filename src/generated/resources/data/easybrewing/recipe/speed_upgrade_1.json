@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    },
-    "S": {
-      "item": "easybrewing:upgrade_base"
-    }
+    "G": "#c:ingots/gold",
+    "R": "#c:dusts/redstone",
+    "S": "easybrewing:upgrade_base"
   },
   "pattern": [
     "GRG",

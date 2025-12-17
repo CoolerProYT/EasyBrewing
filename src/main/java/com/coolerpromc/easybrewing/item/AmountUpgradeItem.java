@@ -6,8 +6,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class AmountUpgradeItem extends Item {
     private final int amount;
@@ -22,10 +23,10 @@ public class AmountUpgradeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag flag) {
         if (!CommonConfig.CONFIG.allowAmountUpgrade.get()){
-            tooltipComponents.add(Component.translatable("tooltip.easybrewing.amount_upgrade_disabled").withStyle(ChatFormatting.RED));
+            tooltipAdder.accept(Component.translatable("tooltip.easybrewing.amount_upgrade_disabled").withStyle(ChatFormatting.RED));
         }
-        tooltipComponents.add(Component.translatable("tooltip.easybrewing.amount_upgrade_tooltip", amount).withStyle(ChatFormatting.BLUE));
+        tooltipAdder.accept(Component.translatable("tooltip.easybrewing.amount_upgrade_tooltip", amount).withStyle(ChatFormatting.BLUE));
     }
 }

@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "tag": "c:storage_blocks/redstone"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    },
-    "S": {
-      "item": "easybrewing:speed_upgrade_2"
-    }
+    "B": "#c:storage_blocks/redstone",
+    "R": "#c:dusts/redstone",
+    "S": "easybrewing:speed_upgrade_2"
   },
   "pattern": [
     "BRB",

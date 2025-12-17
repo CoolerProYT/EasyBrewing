@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.rei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
@@ -45,10 +46,11 @@ public class ItemBrewingCategory implements DisplayCategory<ItemBrewingDisplay> 
     public List<Widget> setupDisplay(ItemBrewingDisplay display, Rectangle bounds) {
         List<Widget> widgets = new LinkedList<>();
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.createTexturedWidget(EasyBrewing.id("textures/gui/item_brewing_station.png"), bounds.x + 4, bounds.y + 3, 39, 15, 92, 60));
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 5)).backgroundEnabled(false).entries(EntryIngredients.ofItemStacks(display.recipe().potion())).markInput());
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 24, bounds.y + 25)).backgroundEnabled(false).entries(EntryIngredients.ofItemStacks(display.recipe().input())).markInput());
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 45)).backgroundEnabled(false).entries(List.of(EntryStacks.of(display.recipe().output()))).markOutput());
+//        widgets.add(Widgets.createTexturedWidget(EasyBrewing.id("textures/gui/item_brewing_station.png"), bounds.x + 4, bounds.y + 3, 39, 15, 92, 60));
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 5)).backgroundEnabled(true).entries(EntryIngredients.ofItemStacks(display.recipe().potion())).markInput());
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 24, bounds.y + 25)).backgroundEnabled(true).entries(EntryIngredients.ofItemStacks(display.recipe().input())).markInput());
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 45)).backgroundEnabled(true).entries(List.of(EntryStacks.of(display.recipe().output()))).markOutput());
         return widgets;
     }
 }
+*/

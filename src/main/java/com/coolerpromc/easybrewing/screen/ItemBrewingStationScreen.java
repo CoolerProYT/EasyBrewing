@@ -4,26 +4,28 @@ import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.widget.ChangeCapabilityButton;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewingStationMenu> {
-    private static final ResourceLocation FUEL_LENGTH_SPRITE = ResourceLocation.withDefaultNamespace("container/brewing_stand/fuel_length");
-    private static final ResourceLocation ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
-    private static final ResourceLocation BREW_PROGRESS_SPRITE = EasyBrewing.id("brew_progress");
+    private static final Identifier FUEL_LENGTH_SPRITE = Identifier.withDefaultNamespace("container/brewing_stand/fuel_length");
+    private static final Identifier ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
+    private static final Identifier BREW_PROGRESS_SPRITE = EasyBrewing.id("brew_progress");
 
     private final CyclingSlotBackground potionIcon = new CyclingSlotBackground(37);
     private final List<ChangeCapabilityButton> capabilityButtons = new ArrayList<>();
@@ -55,30 +57,30 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
     private void onPress(Button button){
         if (button instanceof ChangeCapabilityButton btn){
             btn.setSlot(btn.getSlot().next());
-            PacketDistributor.sendToServer(new CapabilityChangeSyncC2SPacket(this.menu.getBlockEntity().getBlockPos(), btn.getDirection(), btn.getSlot()));
+            ClientPacketDistributor.sendToServer(new CapabilityChangeSyncC2SPacket(this.menu.getBlockEntity().getBlockPos(), btn.getDirection(), btn.getSlot()));
         }
     }
 
     @Override
     protected void containerTick() {
         super.containerTick();
-        this.potionIcon.tick(List.of(EasyBrewing.id("item/empty_slot_potion"), EasyBrewing.id("item/empty_slot_splash_potion"), EasyBrewing.id("item/empty_slot_lingering_potion")));
+        this.potionIcon.tick(List.of(EasyBrewing.id("empty_slot_potion"), EasyBrewing.id("empty_slot_splash_potion"), EasyBrewing.id("empty_slot_lingering_potion")));
     }
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1) {
-        guiGraphics.blit(ITEM_BREWING_STATION, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
         this.potionIcon.render(this.menu, guiGraphics, v, leftPos, topPos);
 
         int l = Mth.clamp((18 * this.menu.getFuel() + 20 - 1) / 20, 0, 18);
 
-        guiGraphics.blitSprite(FUEL_LENGTH_SPRITE, 18, 4, 0, 0, leftPos + 16, topPos + 37, l, 4);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, FUEL_LENGTH_SPRITE, 18, 4, 0, 0, leftPos + 16, topPos + 37, l, 4);
 
         int progress = this.menu.getProgress();
         int maxProgress = this.menu.getMaxProgress();
 
         int progressHeight = (int) (28f * (1f - (float) progress / maxProgress));
-        guiGraphics.blitSprite(BREW_PROGRESS_SPRITE, 9, 28, 0, 0, leftPos + 97, topPos + 16, 9, 28 - progressHeight);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, BREW_PROGRESS_SPRITE, 9, 28, 0, 0, leftPos + 97, topPos + 16, 9, 28 - progressHeight);
     }
 
     @Override
@@ -98,14 +100,14 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
             tooltip.add(Component.translatable("screen.easbrewing.arrow_tooltip", this.menu.getProgress(), this.menu.getMaxProgress()));
             tooltip.add(Component.translatable("screen.easybrewing.speed_multiplier_tooltip", String.format("%.2f", this.menu.getSpeedMultiplier())).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable("screen.easybrewing.crafting_amount", this.menu.getAdditionalUpgrade()).withStyle(ChatFormatting.GRAY));
-            if (hasShiftDown()){
+            if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isShiftKeyDown()){
                 tooltip.add(Component.translatable("screen.easybrewing.max_speed_upgrade", this.menu.getMaxUpgrade()).withStyle(ChatFormatting.GRAY));
                 tooltip.add(Component.translatable("screen.easybrewing.max_amount_upgrade", this.menu.getMaxAmountUpgrade()).withStyle(ChatFormatting.GRAY));
             }
             else{
                 tooltip.add(Component.translatable("screen.easybrewing.shift_down", this.menu.getAdditionalUpgrade()).withStyle(ChatFormatting.DARK_GRAY));
             }
-            guiGraphics.renderTooltip(this.font, tooltip, Optional.empty(), mouseX, mouseY);
+            guiGraphics.setTooltipForNextFrame(this.font, tooltip, Optional.empty(), mouseX, mouseY);
         }
     }
 

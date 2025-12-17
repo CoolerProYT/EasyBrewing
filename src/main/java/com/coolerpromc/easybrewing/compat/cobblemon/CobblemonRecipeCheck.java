@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.cobblemon;
 
 import com.cobblemon.mod.common.item.crafting.brewingstand.BrewingStandInput;
@@ -5,7 +6,7 @@ import com.cobblemon.mod.common.item.crafting.brewingstand.BrewingStandRecipe;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.config.CommonConfig;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -21,7 +22,7 @@ public class CobblemonRecipeCheck {
     public static Optional<RecipeHolder<BrewingStandRecipe>> getRecipe(Level level, ItemStack inputStack, ItemStack potionStack){
         if (ModList.get().isLoaded("cobblemon")){
             try{
-                RecipeType<BrewingStandRecipe> brewingStandType = (RecipeType<BrewingStandRecipe>) BuiltInRegistries.RECIPE_TYPE.get(ResourceLocation.fromNamespaceAndPath("cobblemon", "brewing_stand"));
+                RecipeType<BrewingStandRecipe> brewingStandType = (RecipeType<BrewingStandRecipe>) BuiltInRegistries.RECIPE_TYPE.get(Identifier.fromNamespaceAndPath("cobblemon", "brewing_stand"));
                 if (brewingStandType != null){
                     return level.getRecipeManager().getRecipeFor(brewingStandType, new BrewingStandInput(inputStack, List.of(potionStack, potionStack, potionStack)), level);
                 }
@@ -78,3 +79,4 @@ public class CobblemonRecipeCheck {
         return be.outputHandler.innerInsertItem(0, output, true).isEmpty();
     }
 }
+*/
