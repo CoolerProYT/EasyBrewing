@@ -3,10 +3,10 @@
   "category": "misc",
   "key": {
     "B": {
-      "tag": "c:storage_blocks/redstone"
+      "tag": "forge:storage_blocks/redstone"
     },
     "R": {
-      "tag": "c:dusts/redstone"
+      "tag": "forge:dusts/redstone"
     },
     "S": {
       "item": "easybrewing:speed_upgrade_2"
@@ -18,7 +18,7 @@
     "BRB"
   ],
   "result": {
-    "count": 1,
-    "id": "easybrewing:speed_upgrade_3"
-  }
+    "item": "easybrewing:speed_upgrade_3"
+  },
+  "show_notification": true
 }

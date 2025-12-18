@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:ingots/gold"
+            "tag": "forge:ingots/gold"
           }
         ]
       },
@@ -15,7 +15,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:dusts/redstone"
+            "tag": "forge:dusts/redstone"
           }
         ]
       },
@@ -31,7 +31,9 @@
       "conditions": {
         "items": [
           {
-            "items": "easybrewing:upgrade_base"
+            "items": [
+              "easybrewing:upgrade_base"
+            ]
           }
         ]
       },
@@ -40,15 +42,16 @@
   },
   "requirements": [
     [
-      "has_the_recipe",
       "has_gold_ingot",
       "has_redstone_dust",
-      "has_upgrade_base"
+      "has_upgrade_base",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
       "easybrewing:speed_upgrade_1"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }
