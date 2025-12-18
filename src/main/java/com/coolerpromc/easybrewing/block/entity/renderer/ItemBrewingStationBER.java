@@ -1,59 +1,100 @@
 package com.coolerpromc.easybrewing.block.entity.renderer;
 
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
-import net.minecraft.client.render.VertexConsumerProvider;
+import com.coolerpromc.easybrewing.block.entity.renderer.state.ItemBrewingStationRenderState;
+import net.minecraft.client.item.ItemModelManager;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemDisplayContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
+import org.jspecify.annotations.Nullable;
 
-public record ItemBrewingStationBER(BlockEntityRendererFactory.Context context) implements BlockEntityRenderer<ItemBrewingStationBE> {
+import java.util.List;
+
+public record ItemBrewingStationBER(ItemModelManager itemModelManager) implements BlockEntityRenderer<ItemBrewingStationBE, ItemBrewingStationRenderState> {
+    public ItemBrewingStationBER(BlockEntityRendererFactory.Context itemModelManager) {
+        this(itemModelManager.itemModelManager());
+    }
+
     @Override
-    public void render(ItemBrewingStationBE be, float partialTick, MatrixStack poseStack, VertexConsumerProvider bufferSource, int packedLight, int packedOverlay) {
-        Direction facing = be.getCachedState().get(Properties.HORIZONTAL_FACING);
-        ItemStack output = be.outputHandler.getStack(0);
-        ItemStack potion = be.potionHandler.getStack(0);
-        ItemStack input = be.inputHandler.getStack(0);
+    public ItemBrewingStationRenderState createRenderState() {
+        return new ItemBrewingStationRenderState();
+    }
+
+    @Override
+    public void updateRenderState(ItemBrewingStationBE blockEntity, ItemBrewingStationRenderState renderState, float tickProgress, Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
+        BlockEntityRenderer.super.updateRenderState(blockEntity, renderState, tickProgress, cameraPos, crumblingOverlay);
+
+        List<ItemStack> itemStacks = List.of(
+                blockEntity.outputHandler.getStack(0),
+                blockEntity.potionHandler.getStack(0),
+                blockEntity.inputHandler.getStack(0)
+        );
+
+        List<ItemRenderState> itemStackRenderStates = List.of(new ItemRenderState(), new ItemRenderState(), new ItemRenderState());
+
+        for (int i = 0; i < itemStacks.size(); i++) {
+            this.itemModelManager.update(itemStackRenderStates.get(i), itemStacks.get(i), ItemDisplayContext.FIXED, blockEntity.getWorld(), null, 1);
+        }
+
+        renderState.itemRenderStates = itemStackRenderStates;
+    }
+
+    @Override
+    public void render(ItemBrewingStationRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+        Direction facing = renderState.blockState.get(Properties.HORIZONTAL_FACING);
+
+        ItemRenderState output = renderState.itemRenderStates.get(0);
+        ItemRenderState potion = renderState.itemRenderStates.get(1);
+        ItemRenderState input = renderState.itemRenderStates.get(2);
+
+        int packedLight = renderState.lightmapCoordinates;
 
         float yRotation = switch (facing) {
             case NORTH -> -0f;
             case SOUTH -> 180f;
-            case WEST  -> 90f;
-            case EAST  -> -90f;
-            default   -> 0f;
+            case WEST -> 90f;
+            case EAST -> -90f;
+            default -> 0f;
         };
 
-        poseStack.push();
+        matrices.push();
 
-        poseStack.translate(0.5, 0, 0.5);
-        poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation));
-        poseStack.translate(-0.5, 0, -0.5);
+        matrices.translate(0.5, 0, 0.5);
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yRotation));
+        matrices.translate(-0.5, 0, -0.5);
 
-        renderItemStack(output, poseStack, bufferSource, packedLight, packedOverlay, 1.4, 0.3, -45f);
-        renderItemStack(output, poseStack, bufferSource, packedLight, packedOverlay, 2.6, 0.3, 225);
-        renderItemStack(output, poseStack, bufferSource, packedLight, packedOverlay, 2, 1.5, 90f);
+        renderItemStack(output, matrices, queue, packedLight, 1.4, 0.3, -45f);
+        renderItemStack(output, matrices, queue, packedLight, 2.6, 0.3, 225);
+        renderItemStack(output, matrices, queue, packedLight, 2, 1.5, 90f);
 
-        renderItemStack(potion, poseStack, bufferSource, packedLight, packedOverlay, 0.5, 2.625,  0f);
-        renderItemStack(potion, poseStack, bufferSource, packedLight, packedOverlay, 1.25, 3.4,  90f);
-        renderItemStack(potion, poseStack, bufferSource, packedLight, packedOverlay, 1.75, 2.1,  45f);
+        renderItemStack(potion, matrices, queue, packedLight, 0.5, 2.625, 0f);
+        renderItemStack(potion, matrices, queue, packedLight, 1.25, 3.4, 90f);
+        renderItemStack(potion, matrices, queue, packedLight, 1.75, 2.1, 45f);
 
-        renderItemStack(input, poseStack, bufferSource, packedLight, packedOverlay, 2.15, 2.05,  -45f);
-        renderItemStack(input, poseStack, bufferSource, packedLight, packedOverlay, 3.65, 2.625,  0);
-        renderItemStack(input, poseStack, bufferSource, packedLight, packedOverlay, 2.775, 3.5,  90);
+        renderItemStack(input, matrices, queue, packedLight, 2.15, 2.05, -45f);
+        renderItemStack(input, matrices, queue, packedLight, 3.65, 2.625, 0);
+        renderItemStack(input, matrices, queue, packedLight, 2.775, 3.5, 90);
 
-        poseStack.pop();
+        matrices.pop();
     }
 
-    private void renderItemStack(ItemStack stack, MatrixStack poseStack, VertexConsumerProvider bufferSource, int packedLight, int packedOverlay, double x, double z, float rotation){
+    private void renderItemStack(ItemRenderState renderState, MatrixStack poseStack, OrderedRenderCommandQueue queue, int packedLight, double x, double z, float rotation) {
         poseStack.push();
         poseStack.scale(0.25f, 0.25f, 0.25f);
         poseStack.translate(x, 1, z);
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotation));
-        context.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, packedLight, packedOverlay, poseStack, bufferSource, null, 1);
+        renderState.render(poseStack, queue, packedLight, OverlayTexture.DEFAULT_UV, 0);
         poseStack.pop();
     }
 }

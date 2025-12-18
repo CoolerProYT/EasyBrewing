@@ -21,13 +21,13 @@ public class ItemBrewingStationMenu extends ScreenHandler {
     private final PropertyDelegate data;
 
     public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, BlockPos pos) {
-        this(containerId, playerInventory, playerInventory.player.getWorld().getBlockEntity(pos), new ArrayPropertyDelegate(8));
+        this(containerId, playerInventory, playerInventory.player.getEntityWorld().getBlockEntity(pos), new ArrayPropertyDelegate(8));
     }
 
     public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, BlockEntity blockEntity, PropertyDelegate data){
         super(EasyBrewing.ITEM_BREWING_STATION_MENU, containerId);
         this.blockEntity = (ItemBrewingStationBE) blockEntity;
-        this.level = playerInventory.player.getWorld();
+        this.level = playerInventory.player.getEntityWorld();
         this.data = data;
 
         addPlayerInventory(playerInventory);

@@ -1,11 +1,13 @@
 package com.coolerpromc.easybrewing.item;
 
-import java.util.List;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+
+import java.util.function.Consumer;
 
 public class SpeedUpgradeItem extends Item {
     private final float speedMultiplier;
@@ -20,7 +22,7 @@ public class SpeedUpgradeItem extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltipComponents, TooltipType tooltipFlag) {
-        tooltipComponents.add(Text.translatable("tooltip.easybrewing.speed_multiplier_tooltip", String.format("%.2f", speedMultiplier)).formatted(Formatting.BLUE));
+    public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        textConsumer.accept(Text.translatable("tooltip.easybrewing.speed_multiplier_tooltip", String.format("%.2f", speedMultiplier)).formatted(Formatting.BLUE));
     }
 }

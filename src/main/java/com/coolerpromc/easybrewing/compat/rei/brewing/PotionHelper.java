@@ -1,7 +1,11 @@
 package com.coolerpromc.easybrewing.compat.rei.brewing;
 
+import com.coolerpromc.easybrewing.compat.rei.recipe.BrewingRecipe;
+import com.coolerpromc.easybrewing.network.packet.PotionCountSyncS2CPacket;
 import com.google.gson.internal.LinkedTreeMap;
-import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.PotionContentsComponent;
@@ -11,12 +15,13 @@ import net.minecraft.potion.Potion;
 import net.minecraft.recipe.BrewingRecipeRegistry;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.entry.RegistryEntry;
+
 import java.util.*;
 
 public class PotionHelper {
     public static List<BrewingRecipe> registerPotions() {
-        BrewingRecipeRegistry brewing = MinecraftClient.getInstance().world.getBrewingRecipeRegistry();
         List<BrewingRecipe> recipes = new ArrayList<>();
+        BrewingRecipeRegistry brewing = MinecraftClient.getInstance().world.getBrewingRecipeRegistry();
         registerVanillaPotions(brewing, recipes);
         return recipes;
     }
@@ -28,16 +33,23 @@ public class PotionHelper {
                 RegistryEntry<Potion> from = mix.from();
                 Ingredient ingredient = mix.ingredient();
                 RegistryEntry<Potion> to = mix.to();
-                Ingredient base = Ingredient.ofStacks(Arrays.stream(container.getMatchingStacks())
-                        .map(ItemStack::copy)
-                        .peek(stack -> stack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(from))));
-                ItemStack output = Arrays.stream(container.getMatchingStacks())
-                        .map(ItemStack::copy)
-                        .peek(stack -> stack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(to)))
-                        .findFirst().orElse(ItemStack.EMPTY);
+                EntryIngredient base = EntryIngredients.ofIngredient(container)
+                        .map(stack -> {
+                            EntryStack<?> copied = stack.copy();
+                            copied.<ItemStack>castValue().set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(from));
+                            copied.<ItemStack>castValue().setCount(PotionCountSyncS2CPacket.POTION_COUNT);
+                            return copied;
+                        });
+                EntryIngredient output = EntryIngredients.ofIngredient(container)
+                        .map(stack -> {
+                            EntryStack<?> copied = stack.copy();
+                            copied.<ItemStack>castValue().set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(to));
+                            copied.<ItemStack>castValue().setCount(PotionCountSyncS2CPacket.POTION_COUNT);
+                            return copied;
+                        });
+                recipes.add(new BrewingRecipe(base, EntryIngredients.ofIngredient(ingredient), output));
                 potions.add(from);
                 potions.add(to);
-                recipes.add(new BrewingRecipe(base, ingredient, output));
             }
         }
         for (RegistryEntry<Potion> potion : potions) {
@@ -47,11 +59,14 @@ public class PotionHelper {
                 RegistryEntry<Item> to = mix.to();
                 ItemStack baseStack = new ItemStack(from);
                 baseStack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(potion));
-                Ingredient base = Ingredient.ofStacks(baseStack);
+                baseStack.setCount(PotionCountSyncS2CPacket.POTION_COUNT);
+                EntryIngredient base = EntryIngredients.of(baseStack);
                 ItemStack output = new ItemStack(to);
                 output.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(potion));
-                recipes.add(new BrewingRecipe(base, ingredient, output));
+                output.setCount(PotionCountSyncS2CPacket.POTION_COUNT);
+                recipes.add(new BrewingRecipe(base, EntryIngredients.ofIngredient(ingredient), EntryIngredients.of(output)));
             }
         }
     }
+
 }

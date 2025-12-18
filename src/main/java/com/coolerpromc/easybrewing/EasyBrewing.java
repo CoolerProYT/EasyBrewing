@@ -13,6 +13,7 @@ import com.coolerpromc.easybrewing.screen.ItemBrewingStationMenu;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -79,17 +80,17 @@ public class EasyBrewing implements ModInitializer {
 	}
 
     public static <T extends Block> T registerBlock(String name, Function<AbstractBlock.Settings, T> func){
-        T block = Registry.register(Registries.BLOCK, RegistryKey.of(RegistryKeys.BLOCK, id(name)), func.apply(AbstractBlock.Settings.create()));
-        registerItem(name, properties -> new BlockItem(block, properties));
+        T block = Registry.register(Registries.BLOCK, RegistryKey.of(RegistryKeys.BLOCK, id(name)), func.apply(AbstractBlock.Settings.create().registryKey(RegistryKey.of(RegistryKeys.BLOCK, id(name)))));
+        registerItem(name, properties -> new BlockItem(block, properties.useBlockPrefixedTranslationKey()));
         return block;
     }
 
-    public static <T extends BlockEntity, B extends Block> BlockEntityType<T> registerBlockEntity(String name, BlockEntityType.BlockEntityFactory<T> supplier, B block){
-        return Registry.register(Registries.BLOCK_ENTITY_TYPE, RegistryKey.of(RegistryKeys.BLOCK_ENTITY_TYPE, id(name)), BlockEntityType.Builder.create(supplier, block).build(null));
+    public static <T extends BlockEntity, B extends Block> BlockEntityType<T> registerBlockEntity(String name, FabricBlockEntityTypeBuilder.Factory<T> supplier, B block){
+        return Registry.register(Registries.BLOCK_ENTITY_TYPE, RegistryKey.of(RegistryKeys.BLOCK_ENTITY_TYPE, id(name)), FabricBlockEntityTypeBuilder.create(supplier, block).build());
     }
 
     public static <T extends Item> T registerItem(String name, Function<Item.Settings, T> func){
-        return Registry.register(Registries.ITEM, RegistryKey.of(RegistryKeys.ITEM, id(name)), func.apply(new Item.Settings()));
+        return Registry.register(Registries.ITEM, RegistryKey.of(RegistryKeys.ITEM, id(name)), func.apply(new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, id(name)))));
     }
 
     public static <T extends ScreenHandler> ScreenHandlerType<T> registerMenu(String name, ExtendedScreenHandlerType.ExtendedFactory<T, BlockPos> factory){

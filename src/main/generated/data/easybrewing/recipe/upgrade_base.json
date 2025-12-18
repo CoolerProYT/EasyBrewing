@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "minecraft:blaze_powder"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "P": {
-      "item": "minecraft:paper"
-    }
+    "B": "minecraft:blaze_powder",
+    "I": "#c:ingots/iron",
+    "P": "minecraft:paper"
   },
   "pattern": [
     "IPI",

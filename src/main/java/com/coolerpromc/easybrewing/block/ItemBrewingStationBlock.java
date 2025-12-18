@@ -20,10 +20,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -75,13 +75,13 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hitResult) {
+    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hitResult) {
         if (player instanceof ServerPlayerEntity serverPlayer){
             if (level.getBlockEntity(pos) instanceof NamedScreenHandlerFactory be){
                 serverPlayer.openHandledScreen(be);
             }
         }
-        return ItemActionResult.success(level.isClient());
+        return ActionResult.SUCCESS;
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
         double d0 = (double)pos.getX() + 0.4 + (double)random.nextFloat() * 0.2;
         double d1 = (double)pos.getY() + 0.7 + (double)random.nextFloat() * 0.3;
         double d2 = (double)pos.getZ() + 0.4 + (double)random.nextFloat() * 0.2;
-        level.addParticle(ParticleTypes.SMOKE, d0, d1, d2, 0.0F, 0.0F, 0.0F);
+        level.addParticleClient(ParticleTypes.SMOKE, d0, d1, d2, 0.0F, 0.0F, 0.0F);
     }
 
     @Override
@@ -119,17 +119,6 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (state.getBlock() != newState.getBlock()){
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof ItemBrewingStationBE be){
-                be.drops();
-            }
-        }
-        super.onStateReplaced(state, level, pos, newState, movedByPiston);
-    }
-
-    @Override
     protected VoxelShape getOutlineShape(BlockState state, BlockView level, BlockPos pos, ShapeContext context) {
         return SHAPES.get(state.get(FACING));
     }
@@ -137,7 +126,7 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     private static VoxelShape rotateShape(Direction from, Direction to, VoxelShape shape) {
         VoxelShape[] buffer = new VoxelShape[]{shape, VoxelShapes.empty()};
 
-        int times = (to.getHorizontal() - from.getHorizontal() + 4) % 4;
+        int times = (to.getHorizontalQuarterTurns() - from.getHorizontalQuarterTurns() + 4) % 4;
 
         for (int i = 0; i < times; i++) {
             buffer[0].forEachBox((minX, minY, minZ, maxX, maxY, maxZ) -> {

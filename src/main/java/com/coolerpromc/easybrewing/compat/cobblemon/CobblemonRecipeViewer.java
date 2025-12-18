@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.cobblemon;
 
 import com.cobblemon.mod.common.item.crafting.brewingstand.BrewingStandRecipe;
@@ -32,3 +33,4 @@ public class CobblemonRecipeViewer {
         }
     }
 }
+*/

@@ -8,9 +8,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.text.Text;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,9 +45,9 @@ public class ItemBrewingCategory implements DisplayCategory<ItemBrewingDisplay> 
         List<Widget> widgets = new LinkedList<>();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createTexturedWidget(EasyBrewing.id("textures/gui/item_brewing_station.png"), bounds.x + 4, bounds.y + 3, 39, 15, 92, 60));
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 5)).backgroundEnabled(false).entries(EntryIngredients.ofItemStacks(display.recipe().potion())).markInput());
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 24, bounds.y + 25)).backgroundEnabled(false).entries(EntryIngredients.ofItemStacks(display.recipe().input())).markInput());
-        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 45)).backgroundEnabled(false).entries(List.of(EntryStacks.of(display.recipe().output()))).markOutput());
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 5)).backgroundEnabled(false).entries(display.recipe().ingredient()).markInput());
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 24, bounds.y + 25)).backgroundEnabled(false).entries(display.recipe().input()).markInput());
+        widgets.add(Widgets.createSlot(new Point(bounds.x + 44, bounds.y + 45)).backgroundEnabled(false).entries(display.recipe().output()).markOutput());
         return widgets;
     }
 }

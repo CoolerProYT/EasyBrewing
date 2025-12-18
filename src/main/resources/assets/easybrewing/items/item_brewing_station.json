@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "easybrewing:block/item_brewing_station"
+  }
+}

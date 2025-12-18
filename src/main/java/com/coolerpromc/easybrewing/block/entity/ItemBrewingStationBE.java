@@ -1,8 +1,6 @@
 package com.coolerpromc.easybrewing.block.entity;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
-import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonBottleIngredientCheck;
-import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonRecipeCheck;
 import com.coolerpromc.easybrewing.config.CommonConfig;
 import com.coolerpromc.easybrewing.inventory.OutputItemStackHandler;
 import com.coolerpromc.easybrewing.item.AmountUpgradeItem;
@@ -25,7 +23,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.PotionItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -39,6 +36,8 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.dynamic.Codecs;
@@ -159,46 +158,44 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     @Override
-    protected void writeNbt(@NotNull NbtCompound tag, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(tag, registries);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
-        tag.put("fuelHandler", Inventories.writeNbt(new NbtCompound(), fuelHandler.heldStacks, registries));
-        tag.put("potionHandler", Inventories.writeNbt(new NbtCompound(), potionHandler.heldStacks, registries));
-        tag.put("inputHandler", Inventories.writeNbt(new NbtCompound(), inputHandler.heldStacks, registries));
-        tag.put("outputHandler", Inventories.writeNbt(new NbtCompound(), outputHandler.heldStacks, registries));
-        tag.put("upgradeHandler", Inventories.writeNbt(new NbtCompound(), upgradeHandler.heldStacks, registries));
+        Inventories.writeData(view.get("fuelHandler"), fuelHandler.heldStacks);
+        Inventories.writeData(view.get("potionHandler"), potionHandler.heldStacks);
+        Inventories.writeData(view.get("inputHandler"), inputHandler.heldStacks);
+        Inventories.writeData(view.get("outputHandler"), outputHandler.heldStacks);
+        Inventories.writeData(view.get("upgradeHandler"), upgradeHandler.heldStacks);
 
-        tag.putInt("progress", progress);
-        tag.putInt("maxProgress", maxProgress);
-        tag.putInt("fuel", fuel);
-        tag.putFloat("multiplier", multiplier);
-        tag.putInt("additionalAmount", additionalAmount);
-        tag.put("capabilityBySide", Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow());
+        view.putInt("progress", progress);
+        view.putInt("maxProgress", maxProgress);
+        view.putInt("fuel", fuel);
+        view.putFloat("multiplier", multiplier);
+        view.putInt("additionalAmount", additionalAmount);
+        view.put("capabilityBySide", Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC), capabilityBySide);
     }
 
     @Override
-    protected void readNbt(@NotNull NbtCompound tag, RegistryWrapper.@NotNull WrapperLookup registries) {
-        super.readNbt(tag, registries);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        Inventories.readNbt(tag.getCompound("fuelHandler"), fuelHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("potionHandler"), potionHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("inputHandler"), inputHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("outputHandler"), outputHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("upgradeHandler"), upgradeHandler.heldStacks, registries);
+        Inventories.readData(view.getReadView("fuelHandler"), fuelHandler.heldStacks);
+        Inventories.readData(view.getReadView("potionHandler"), potionHandler.heldStacks);
+        Inventories.readData(view.getReadView("inputHandler"), inputHandler.heldStacks);
+        Inventories.readData(view.getReadView("outputHandler"), outputHandler.heldStacks);
+        Inventories.readData(view.getReadView("upgradeHandler"), upgradeHandler.heldStacks);
 
-        progress = tag.getInt("progress");
-        maxProgress = tag.getInt("maxProgress");
-        fuel = tag.getInt("fuel");
-        multiplier = tag.getFloat("multiplier");
-        additionalAmount = tag.getInt("additionalAmount");
-        capabilityBySide = new HashMap<>(Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow());
+        progress = view.getInt("progress", 0);
+        maxProgress = view.getInt("maxProgress", 400);
+        fuel = view.getInt("fuel", 0);
+        multiplier = view.getFloat("multiplier", 1f);
+        additionalAmount = view.getInt("additionalAmount", 0);
+        capabilityBySide = view.read("capabilityBySide", Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC)).orElse(new HashMap<>());
     }
 
     @Override
     public @NotNull NbtCompound toInitialChunkDataNbt(RegistryWrapper.@NotNull WrapperLookup registries) {
-        NbtCompound tag = new NbtCompound();
-        writeNbt(tag, registries);
-        return tag;
+        return createNbtWithIdentifyingData(registries);
     }
 
     @Override
@@ -212,7 +209,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         handleFuel();
         checkUpgrade();
 
-        if (isBrewable(level.getBrewingRecipeRegistry()) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonRecipeCheck.hasRecipe(this))){
+        if (isBrewable(level.getBrewingRecipeRegistry()) || (FabricLoader.getInstance().isModLoaded("cobblemon")/* && CobblemonRecipeCheck.hasRecipe(this)*/)){
             progress++;
             markDirty(level, pos, blockState);
 
@@ -220,9 +217,9 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
                 if (isBrewable(level.getBrewingRecipeRegistry())){
                     doBrew(level.getBrewingRecipeRegistry());
                 }
-                else if (FabricLoader.getInstance().isModLoaded("cobblemon")){
+                /*else if (FabricLoader.getInstance().isModLoaded("cobblemon")){
                     CobblemonRecipeCheck.craft(this);
-                }
+                }*/
                 level.playSound(null, pos, SoundEvents.BLOCK_BREWING_STAND_BREW, SoundCategory.BLOCKS, 1.0F, 1.0F);
                 progress = 0;
             }
@@ -372,7 +369,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     private boolean isValidPotion(ItemStack stack){
-        return stack.getItem() instanceof PotionItem || stack.isOf(Items.GLASS_BOTTLE) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, world));
+        return stack.getItem() instanceof PotionItem || stack.isOf(Items.GLASS_BOTTLE) || (FabricLoader.getInstance().isModLoaded("cobblemon")/* && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, world)*/);
     }
 
     public void drops(){
@@ -386,6 +383,11 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         );
 
         ItemScatterer.spawn(world, getPos(), container);
+    }
+
+    @Override
+    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
+        drops();
     }
 
     public enum Slot{

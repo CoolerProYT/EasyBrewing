@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.jei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
@@ -27,7 +28,7 @@ public class ModJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(EasyBrewing.ITEM_BREWING_STATION, ItemBrewingCategory.TYPE);
+        registration.addCraftingStation(ItemBrewingCategory.TYPE, EasyBrewing.ITEM_BREWING_STATION);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class ModJeiPlugin implements IModPlugin {
             output.setCount(PotionCountSyncS2CPacket.POTION_COUNT);
             return new ItemBrewingRecipe(iJeiBrewingRecipe.getIngredients().stream().map(ItemStack::copy).toList(), iJeiBrewingRecipe.getPotionInputs().stream().map(ItemStack::copy).peek(stack -> stack.setCount(PotionCountSyncS2CPacket.POTION_COUNT)).toList(), output);
         }).toList());
-        if (FabricLoader.getInstance().isModLoaded("cobblemon")) CobblemonRecipeViewer.addRecipes(recipeList, level);
+//        if (FabricLoader.getInstance().isModLoaded("cobblemon")) CobblemonRecipeViewer.addRecipes(recipeList, level);
         registration.addRecipes(ItemBrewingCategory.TYPE, recipeList);
     }
 
@@ -54,3 +55,4 @@ public class ModJeiPlugin implements IModPlugin {
         return EasyBrewing.id("jei_plugin");
     }
 }
+*/

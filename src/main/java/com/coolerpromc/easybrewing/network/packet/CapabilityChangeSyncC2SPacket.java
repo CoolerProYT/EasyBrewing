@@ -24,7 +24,7 @@ public record CapabilityChangeSyncC2SPacket(BlockPos pos, Direction direction, I
     );
 
     public static void handle(CapabilityChangeSyncC2SPacket packet, ServerPlayNetworking.Context context){
-        BlockEntity blockEntity = context.player().getWorld().getBlockEntity(packet.pos);
+        BlockEntity blockEntity = context.player().getEntityWorld().getBlockEntity(packet.pos);
         if (blockEntity instanceof ItemBrewingStationBE be){
             be.setCapabilityBySide(packet.direction, packet.slot);
         }
