@@ -1,0 +1,1 @@
+- Fixed recipe and loot table not working
