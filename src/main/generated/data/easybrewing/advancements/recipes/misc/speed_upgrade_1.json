@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_redstone_block": {
+    "has_gold_ingot": {
       "conditions": {
         "items": [
           {
-            "items": "#c:storage_blocks/redstone"
+            "tag": "c:gold_ingots"
           }
         ]
       },
@@ -15,17 +15,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:dusts/redstone"
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
-    },
-    "has_speed_upgrade_2": {
-      "conditions": {
-        "items": [
-          {
-            "items": "easybrewing:speed_upgrade_2"
+            "tag": "c:redstone_dusts"
           }
         ]
       },
@@ -33,22 +23,35 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:speed_upgrade_3"
+        "recipe": "easybrewing:speed_upgrade_1"
       },
       "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_upgrade_base": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "easybrewing:upgrade_base"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_redstone_block",
+      "has_gold_ingot",
       "has_redstone_dust",
-      "has_speed_upgrade_2"
+      "has_upgrade_base",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "easybrewing:speed_upgrade_3"
+      "easybrewing:speed_upgrade_1"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

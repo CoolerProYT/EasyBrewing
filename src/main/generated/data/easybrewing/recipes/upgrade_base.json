@@ -6,7 +6,7 @@
       "item": "minecraft:blaze_powder"
     },
     "I": {
-      "tag": "c:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "P": {
       "item": "minecraft:paper"
@@ -18,7 +18,7 @@
     "IPI"
   ],
   "result": {
-    "count": 1,
-    "id": "easybrewing:upgrade_base"
-  }
+    "item": "easybrewing:upgrade_base"
+  },
+  "show_notification": true
 }

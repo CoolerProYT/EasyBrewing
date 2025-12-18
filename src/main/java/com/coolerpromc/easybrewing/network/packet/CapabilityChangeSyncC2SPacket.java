@@ -2,36 +2,35 @@ package com.coolerpromc.easybrewing.network.packet;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-public record CapabilityChangeSyncC2SPacket(BlockPos pos, Direction direction, ItemBrewingStationBE.Slot slot) implements CustomPayload {
-    public static final Id<CapabilityChangeSyncC2SPacket> TYPE = new Id<>(EasyBrewing.id("capability_change_sync"));
+public record CapabilityChangeSyncC2SPacket(BlockPos pos, Direction direction, ItemBrewingStationBE.Slot slot) {
+    public static final Identifier TYPE = EasyBrewing.id("capability_change_sync");
 
-    public static final PacketCodec<RegistryByteBuf, CapabilityChangeSyncC2SPacket> STREAM_CODEC = PacketCodec.tuple(
-            BlockPos.PACKET_CODEC,
-            CapabilityChangeSyncC2SPacket::pos,
-            Direction.PACKET_CODEC,
-            CapabilityChangeSyncC2SPacket::direction,
-            ItemBrewingStationBE.Slot.STREAM_CODEC,
-            CapabilityChangeSyncC2SPacket::slot,
-            CapabilityChangeSyncC2SPacket::new
-    );
+    public static PacketByteBuf encode(PacketByteBuf buf, CapabilityChangeSyncC2SPacket packet){
+        buf.writeBlockPos(packet.pos());
+        buf.writeEnumConstant(packet.direction());
+        buf.writeEnumConstant(packet.slot());
+        return buf;
+    }
 
-    public static void handle(CapabilityChangeSyncC2SPacket packet, ServerPlayNetworking.Context context){
-        BlockEntity blockEntity = context.player().getWorld().getBlockEntity(packet.pos);
+    public static CapabilityChangeSyncC2SPacket decode(PacketByteBuf buf){
+        return new CapabilityChangeSyncC2SPacket(buf.readBlockPos(), buf.readEnumConstant(Direction.class), buf.readEnumConstant(ItemBrewingStationBE.Slot.class));
+    }
+
+    public static void handle(MinecraftServer server, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender){
+        CapabilityChangeSyncC2SPacket packet = decode(buf);
+        BlockEntity blockEntity = playerEntity.getServerWorld().getBlockEntity(packet.pos);
         if (blockEntity instanceof ItemBrewingStationBE be){
             be.setCapabilityBySide(packet.direction, packet.slot);
         }
-    }
-
-    @Override
-    public Id<? extends CustomPayload> getId() {
-        return TYPE;
     }
 }

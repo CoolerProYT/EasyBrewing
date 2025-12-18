@@ -3,10 +3,10 @@
   "category": "misc",
   "key": {
     "L": {
-      "tag": "c:storage_blocks/lapis"
+      "item": "minecraft:lapis_block"
     },
     "R": {
-      "tag": "c:dusts/redstone"
+      "tag": "c:redstone_dusts"
     },
     "S": {
       "item": "easybrewing:speed_upgrade_1"
@@ -18,7 +18,7 @@
     "LRL"
   ],
   "result": {
-    "count": 1,
-    "id": "easybrewing:speed_upgrade_2"
-  }
+    "item": "easybrewing:speed_upgrade_2"
+  },
+  "show_notification": true
 }

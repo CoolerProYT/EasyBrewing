@@ -20,8 +20,6 @@ public class CommonConfig {
     private int potionCount;
     public int processingTime;
 
-    public int cobblemonPotionCount;
-
     private CommonConfig() {}
 
     public void load() {
@@ -77,14 +75,6 @@ public class CommonConfig {
                 "The base processing time for a recipe in ticks",
                 20, 4000
         );
-
-        cobblemonPotionCount = getInt(
-                "Cobblemon.cobblemonPotionCount",
-                3,
-                "The amount of cobblemon brewing recipe item can craft with one ingredient.",
-                1, 64
-        );
-
     }
 
     private int getInt(String path, int def, String comment, int min, int max) {

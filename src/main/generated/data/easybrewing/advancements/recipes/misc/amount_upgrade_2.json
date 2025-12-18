@@ -1,11 +1,13 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_blaze_powder": {
+    "has_amount_upgrade_1": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:blaze_powder"
+            "items": [
+              "easybrewing:amount_upgrade_1"
+            ]
           }
         ]
       },
@@ -15,17 +17,19 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:gems/diamond"
+            "tag": "c:diamonds"
           }
         ]
       },
       "trigger": "minecraft:inventory_changed"
     },
-    "has_stone_material": {
+    "has_glass_bottle": {
       "conditions": {
         "items": [
           {
-            "items": "#minecraft:stone_crafting_materials"
+            "items": [
+              "minecraft:glass_bottle"
+            ]
           }
         ]
       },
@@ -33,22 +37,23 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:item_brewing_station"
+        "recipe": "easybrewing:amount_upgrade_2"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
+      "has_glass_bottle",
       "has_diamond",
-      "has_blaze_powder",
-      "has_stone_material"
+      "has_amount_upgrade_1",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "easybrewing:item_brewing_station"
+      "easybrewing:amount_upgrade_2"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

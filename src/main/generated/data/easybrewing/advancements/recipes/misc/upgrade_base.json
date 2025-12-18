@@ -5,17 +5,31 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:blaze_powder"
+            "items": [
+              "minecraft:blaze_powder"
+            ]
           }
         ]
       },
       "trigger": "minecraft:inventory_changed"
     },
-    "has_glass_bottle": {
+    "has_iron_ingot": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:glass_bottle"
+            "tag": "c:iron_ingots"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_paper": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:paper"
+            ]
           }
         ]
       },
@@ -23,32 +37,23 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:amount_upgrade_1"
+        "recipe": "easybrewing:upgrade_base"
       },
       "trigger": "minecraft:recipe_unlocked"
-    },
-    "has_upgrade_base": {
-      "conditions": {
-        "items": [
-          {
-            "items": "easybrewing:upgrade_base"
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_glass_bottle",
+      "has_iron_ingot",
+      "has_paper",
       "has_blaze_powder",
-      "has_upgrade_base"
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "easybrewing:amount_upgrade_1"
+      "easybrewing:upgrade_base"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

@@ -6,7 +6,7 @@
       "item": "minecraft:blaze_powder"
     },
     "D": {
-      "tag": "c:gems/diamond"
+      "tag": "c:diamonds"
     },
     "S": {
       "tag": "minecraft:stone_crafting_materials"
@@ -18,7 +18,7 @@
     "SSS"
   ],
   "result": {
-    "count": 1,
-    "id": "easybrewing:item_brewing_station"
-  }
+    "item": "easybrewing:item_brewing_station"
+  },
+  "show_notification": true
 }

@@ -4,6 +4,7 @@ import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.widget.ChangeCapabilityButton;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.CyclingSlotIcon;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemBrewingStationScreen extends HandledScreen<ItemBrewingStationMenu> {
-    private static final Identifier FUEL_LENGTH_SPRITE = Identifier.ofVanilla("container/brewing_stand/fuel_length");
+    private static final Identifier FUEL_LENGTH_SPRITE = new Identifier("container/brewing_stand/fuel_length");
     private static final Identifier ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
     private static final Identifier BREW_PROGRESS_SPRITE = EasyBrewing.id("brew_progress");
 
@@ -54,7 +55,7 @@ public class ItemBrewingStationScreen extends HandledScreen<ItemBrewingStationMe
     private void onPress(ButtonWidget button){
         if (button instanceof ChangeCapabilityButton btn){
             btn.setSlot(btn.getSlot().next());
-            ClientPlayNetworking.send(new CapabilityChangeSyncC2SPacket(this.handler.getBlockEntity().getPos(), btn.getDirection(), btn.getSlot()));
+            ClientPlayNetworking.send(CapabilityChangeSyncC2SPacket.TYPE, CapabilityChangeSyncC2SPacket.encode(PacketByteBufs.create(), new CapabilityChangeSyncC2SPacket(this.handler.getBlockEntity().getPos(), btn.getDirection(), btn.getSlot())));
         }
     }
 
@@ -71,17 +72,18 @@ public class ItemBrewingStationScreen extends HandledScreen<ItemBrewingStationMe
 
         int l = MathHelper.clamp((18 * this.handler.getFuel() + 20 - 1) / 20, 0, 18);
 
-        guiGraphics.drawGuiTexture(FUEL_LENGTH_SPRITE, 18, 4, 0, 0, x + 16, y + 37, l, 4);
+        guiGraphics.drawTexture(new Identifier("textures/gui/container/brewing_stand.png"), x + 16, y + 37, 176, 29, l, 4);
 
         int progress = this.handler.getProgress();
         int maxProgress = this.handler.getMaxProgress();
 
         int progressHeight = (int) (28f * (1f - (float) progress / maxProgress));
-        guiGraphics.drawGuiTexture(BREW_PROGRESS_SPRITE, 9, 28, 0, 0, x + 97, y + 16, 9, 28 - progressHeight);
+        guiGraphics.drawTexture(new Identifier("textures/gui/container/brewing_stand.png"), x + 97, y + 16, 176, 0, 9, 28 - progressHeight);
     }
 
     @Override
     public void render(DrawContext guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         drawMouseoverTooltip(guiGraphics, mouseX, mouseY);
         renderArrowTooltip(guiGraphics, mouseX, mouseY);

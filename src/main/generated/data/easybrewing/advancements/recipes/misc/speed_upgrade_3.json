@@ -1,11 +1,13 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_lapis_lazuli_block": {
+    "has_redstone_block": {
       "conditions": {
         "items": [
           {
-            "items": "#c:storage_blocks/lapis"
+            "items": [
+              "minecraft:redstone_block"
+            ]
           }
         ]
       },
@@ -15,17 +17,19 @@
       "conditions": {
         "items": [
           {
-            "items": "#c:dusts/redstone"
+            "tag": "c:redstone_dusts"
           }
         ]
       },
       "trigger": "minecraft:inventory_changed"
     },
-    "has_speed_upgrade_1": {
+    "has_speed_upgrade_2": {
       "conditions": {
         "items": [
           {
-            "items": "easybrewing:speed_upgrade_1"
+            "items": [
+              "easybrewing:speed_upgrade_2"
+            ]
           }
         ]
       },
@@ -33,22 +37,23 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:speed_upgrade_2"
+        "recipe": "easybrewing:speed_upgrade_3"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_lapis_lazuli_block",
+      "has_redstone_block",
       "has_redstone_dust",
-      "has_speed_upgrade_1"
+      "has_speed_upgrade_2",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "easybrewing:speed_upgrade_2"
+      "easybrewing:speed_upgrade_3"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

@@ -2,28 +2,22 @@ package com.coolerpromc.easybrewing.block;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
-import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -60,13 +54,8 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     }
 
     @Override
-    protected BlockRenderType getRenderType(BlockState state) {
+    public BlockRenderType getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
-    }
-
-    @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
-        return createCodec(ItemBrewingStationBlock::new);
     }
 
     @Override
@@ -75,18 +64,18 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hitResult) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (player instanceof ServerPlayerEntity serverPlayer){
-            if (level.getBlockEntity(pos) instanceof NamedScreenHandlerFactory be){
+            if (world.getBlockEntity(pos) instanceof NamedScreenHandlerFactory be){
                 serverPlayer.openHandledScreen(be);
             }
         }
-        return ItemActionResult.success(level.isClient());
+        return ActionResult.success(world.isClient());
     }
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(World level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return validateTicker(blockEntityType, EasyBrewing.ITEM_BREWING_STATION_BE, (level1, blockPos, blockState, be) -> be.tick(level1, blockPos, blockState));
+        return checkType(blockEntityType, EasyBrewing.ITEM_BREWING_STATION_BE, (level1, blockPos, blockState, be) -> be.tick(level1, blockPos, blockState));
     }
 
     @Override
@@ -109,17 +98,17 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, BlockRotation rotation) {
+    public BlockState rotate(BlockState state, BlockRotation rotation) {
         return state.with(FACING, rotation.rotate(state.get(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, BlockMirror mirror) {
+    public BlockState mirror(BlockState state, BlockMirror mirror) {
         return state.rotate(mirror.getRotation(state.get(FACING)));
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onStateReplaced(BlockState state, World level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (state.getBlock() != newState.getBlock()){
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof ItemBrewingStationBE be){
@@ -130,7 +119,7 @@ public class ItemBrewingStationBlock extends BlockWithEntity {
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView level, BlockPos pos, ShapeContext context) {
+    public VoxelShape getOutlineShape(BlockState state, BlockView level, BlockPos pos, ShapeContext context) {
         return SHAPES.get(state.get(FACING));
     }
 

@@ -7,12 +7,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemBrewingStationMenu extends ScreenHandler {
@@ -20,8 +20,8 @@ public class ItemBrewingStationMenu extends ScreenHandler {
     private final World level;
     private final PropertyDelegate data;
 
-    public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, BlockPos pos) {
-        this(containerId, playerInventory, playerInventory.player.getWorld().getBlockEntity(pos), new ArrayPropertyDelegate(8));
+    public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, PacketByteBuf buf) {
+        this(containerId, playerInventory, playerInventory.player.getWorld().getBlockEntity(buf.readBlockPos()), new ArrayPropertyDelegate(8));
     }
 
     public ItemBrewingStationMenu(int containerId, PlayerInventory playerInventory, BlockEntity blockEntity, PropertyDelegate data){

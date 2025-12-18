@@ -7,8 +7,8 @@ import net.minecraft.registry.RegistryWrapper;
 import java.util.concurrent.CompletableFuture;
 
 public class ModBlockLootTables extends FabricBlockLootTableProvider {
-    public ModBlockLootTables(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registries) {
-        super(output, registries);
+    public ModBlockLootTables(FabricDataOutput output) {
+        super(output);
     }
 
     @Override

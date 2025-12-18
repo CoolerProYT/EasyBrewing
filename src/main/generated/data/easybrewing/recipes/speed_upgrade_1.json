@@ -3,10 +3,10 @@
   "category": "misc",
   "key": {
     "G": {
-      "tag": "c:ingots/gold"
+      "tag": "c:gold_ingots"
     },
     "R": {
-      "tag": "c:dusts/redstone"
+      "tag": "c:redstone_dusts"
     },
     "S": {
       "item": "easybrewing:upgrade_base"
@@ -18,7 +18,7 @@
     "GRG"
   ],
   "result": {
-    "count": 1,
-    "id": "easybrewing:speed_upgrade_1"
-  }
+    "item": "easybrewing:speed_upgrade_1"
+  },
+  "show_notification": true
 }

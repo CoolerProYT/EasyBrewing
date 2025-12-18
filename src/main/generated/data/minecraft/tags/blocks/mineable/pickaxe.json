@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "easybrewing:item_brewing_station"
   ]

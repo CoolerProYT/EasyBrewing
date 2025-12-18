@@ -6,7 +6,7 @@
       "item": "easybrewing:amount_upgrade_1"
     },
     "D": {
-      "tag": "c:gems/diamond"
+      "tag": "c:diamonds"
     },
     "G": {
       "item": "minecraft:glass_bottle"
@@ -18,7 +18,7 @@
     "GDG"
   ],
   "result": {
-    "count": 1,
-    "id": "easybrewing:amount_upgrade_2"
-  }
+    "item": "easybrewing:amount_upgrade_2"
+  },
+  "show_notification": true
 }

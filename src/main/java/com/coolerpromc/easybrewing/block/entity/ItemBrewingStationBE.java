@@ -1,8 +1,7 @@
 package com.coolerpromc.easybrewing.block.entity;
 
+import com.cobblemon.mod.fabric.brewing.CobblemonFabricBreweryRegistry;
 import com.coolerpromc.easybrewing.EasyBrewing;
-import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonBottleIngredientCheck;
-import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonRecipeCheck;
 import com.coolerpromc.easybrewing.config.CommonConfig;
 import com.coolerpromc.easybrewing.inventory.OutputItemStackHandler;
 import com.coolerpromc.easybrewing.item.AmountUpgradeItem;
@@ -14,7 +13,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,14 +24,11 @@ import net.minecraft.item.Items;
 import net.minecraft.item.PotionItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -41,7 +36,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -52,7 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
-public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenHandlerFactory<BlockPos> {
+public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenHandlerFactory {
     public final PropertyDelegate data;
     public final SimpleInventory fuelHandler = new SimpleInventory(1){
         @Override
@@ -154,50 +148,50 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     @Override
-    public BlockPos getScreenOpeningData(ServerPlayerEntity player) {
-        return this.getPos();
+    public void writeScreenOpeningData(ServerPlayerEntity serverPlayerEntity, PacketByteBuf packetByteBuf) {
+        packetByteBuf.writeBlockPos(getPos());
     }
 
     @Override
-    protected void writeNbt(@NotNull NbtCompound tag, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(tag, registries);
+    protected void writeNbt(@NotNull NbtCompound tag) {
+        super.writeNbt(tag);
 
-        tag.put("fuelHandler", Inventories.writeNbt(new NbtCompound(), fuelHandler.heldStacks, registries));
-        tag.put("potionHandler", Inventories.writeNbt(new NbtCompound(), potionHandler.heldStacks, registries));
-        tag.put("inputHandler", Inventories.writeNbt(new NbtCompound(), inputHandler.heldStacks, registries));
-        tag.put("outputHandler", Inventories.writeNbt(new NbtCompound(), outputHandler.heldStacks, registries));
-        tag.put("upgradeHandler", Inventories.writeNbt(new NbtCompound(), upgradeHandler.heldStacks, registries));
+        tag.put("fuelHandler", Inventories.writeNbt(new NbtCompound(), fuelHandler.stacks));
+        tag.put("potionHandler", Inventories.writeNbt(new NbtCompound(), potionHandler.stacks));
+        tag.put("inputHandler", Inventories.writeNbt(new NbtCompound(), inputHandler.stacks));
+        tag.put("outputHandler", Inventories.writeNbt(new NbtCompound(), outputHandler.stacks));
+        tag.put("upgradeHandler", Inventories.writeNbt(new NbtCompound(), upgradeHandler.stacks));
 
         tag.putInt("progress", progress);
         tag.putInt("maxProgress", maxProgress);
         tag.putInt("fuel", fuel);
         tag.putFloat("multiplier", multiplier);
         tag.putInt("additionalAmount", additionalAmount);
-        tag.put("capabilityBySide", Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow());
+        tag.put("capabilityBySide", Codec.unboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow(false, EasyBrewing.LOGGER::error));
     }
 
     @Override
-    protected void readNbt(@NotNull NbtCompound tag, RegistryWrapper.@NotNull WrapperLookup registries) {
-        super.readNbt(tag, registries);
+    public void readNbt(@NotNull NbtCompound tag) {
+        super.readNbt(tag);
 
-        Inventories.readNbt(tag.getCompound("fuelHandler"), fuelHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("potionHandler"), potionHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("inputHandler"), inputHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("outputHandler"), outputHandler.heldStacks, registries);
-        Inventories.readNbt(tag.getCompound("upgradeHandler"), upgradeHandler.heldStacks, registries);
+        Inventories.readNbt(tag.getCompound("fuelHandler"), fuelHandler.stacks);
+        Inventories.readNbt(tag.getCompound("potionHandler"), potionHandler.stacks);
+        Inventories.readNbt(tag.getCompound("inputHandler"), inputHandler.stacks);
+        Inventories.readNbt(tag.getCompound("outputHandler"), outputHandler.stacks);
+        Inventories.readNbt(tag.getCompound("upgradeHandler"), upgradeHandler.stacks);
 
         progress = tag.getInt("progress");
         maxProgress = tag.getInt("maxProgress");
         fuel = tag.getInt("fuel");
         multiplier = tag.getFloat("multiplier");
         additionalAmount = tag.getInt("additionalAmount");
-        capabilityBySide = new HashMap<>(Codecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow());
+        capabilityBySide = new HashMap<>(Codec.unboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow(false, EasyBrewing.LOGGER::error));
     }
 
     @Override
-    public @NotNull NbtCompound toInitialChunkDataNbt(RegistryWrapper.@NotNull WrapperLookup registries) {
+    public @NotNull NbtCompound toInitialChunkDataNbt() {
         NbtCompound tag = new NbtCompound();
-        writeNbt(tag, registries);
+        writeNbt(tag);
         return tag;
     }
 
@@ -212,17 +206,12 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         handleFuel();
         checkUpgrade();
 
-        if (isBrewable(level.getBrewingRecipeRegistry()) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonRecipeCheck.hasRecipe(this))){
+        if (isBrewable()){
             progress++;
             markDirty(level, pos, blockState);
 
             if (progress >= maxProgress){
-                if (isBrewable(level.getBrewingRecipeRegistry())){
-                    doBrew(level.getBrewingRecipeRegistry());
-                }
-                else if (FabricLoader.getInstance().isModLoaded("cobblemon")){
-                    CobblemonRecipeCheck.craft(this);
-                }
+                doBrew();
                 level.playSound(null, pos, SoundEvents.BLOCK_BREWING_STAND_BREW, SoundCategory.BLOCKS, 1.0F, 1.0F);
                 progress = 0;
             }
@@ -279,15 +268,15 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         }
     }
 
-    private boolean isBrewable(BrewingRecipeRegistry potionBrewing) {
+    private boolean isBrewable() {
         ItemStack ingredient = inputHandler.getStack(0);
         if (ingredient.isEmpty()) {
             return false;
-        } else if (!potionBrewing.isValidIngredient(ingredient)) {
+        } else if (!BrewingRecipeRegistry.isValidIngredient(ingredient)) {
             return false;
         } else {
             ItemStack potion = potionHandler.getStack(0);
-            return !potion.isEmpty() && potionBrewing.hasRecipe(potion, ingredient) && hasEnoughInput() && canInsertIntoOutputSlot(potionBrewing) && hasFuel();
+            return !potion.isEmpty() && BrewingRecipeRegistry.hasRecipe(potion, ingredient) && hasEnoughInput() && canInsertIntoOutputSlot() && hasFuel();
         }
     }
 
@@ -309,8 +298,8 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         return fuel > 0;
     }
 
-    private boolean canInsertIntoOutputSlot(BrewingRecipeRegistry potionbrewing){
-        ItemStack output = potionbrewing.craft(inputHandler.getStack(0), potionHandler.getStack(0));
+    private boolean canInsertIntoOutputSlot(){
+        ItemStack output = BrewingRecipeRegistry.craft(inputHandler.getStack(0), potionHandler.getStack(0));
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
         try(Transaction tx = Transaction.openOuter()){
             long inserted = outputStorage.insert(ItemVariant.of(output), output.getCount(), tx);
@@ -318,10 +307,10 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         }
     }
 
-    private void doBrew(BrewingRecipeRegistry potionbrewing) {
+    private void doBrew() {
         ItemStack ingredient = inputHandler.getStack(0);
         ItemStack potion = potionHandler.getStack(0);
-        ItemStack output = potionbrewing.craft(ingredient, potion);
+        ItemStack output = BrewingRecipeRegistry.craft(ingredient, potion);
 
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
 
@@ -372,7 +361,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     private boolean isValidPotion(ItemStack stack){
-        return stack.getItem() instanceof PotionItem || stack.isOf(Items.GLASS_BOTTLE) || (FabricLoader.getInstance().isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, world));
+        return stack.getItem() instanceof PotionItem || stack.isOf(Items.GLASS_BOTTLE) || CobblemonFabricBreweryRegistry.INSTANCE.isValidPotionSlot(stack);
     }
 
     public void drops(){
@@ -395,7 +384,6 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         OUTPUT(0xFFde5d07, 39);
 
         public static final Codec<Slot> CODEC = Codec.STRING.xmap(Slot::valueOf, Slot::name);
-        public static final PacketCodec<RegistryByteBuf, Slot> STREAM_CODEC = PacketCodecs.registryCodec(CODEC);
 
         public final int color;
         public final int slotIndex;

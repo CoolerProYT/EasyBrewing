@@ -5,7 +5,6 @@ import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.config.CommonConfig;
 import com.coolerpromc.easybrewing.event.CapabilitiesEvent;
 import com.coolerpromc.easybrewing.event.ConfigEvent;
-import com.coolerpromc.easybrewing.event.NetworkEvent;
 import com.coolerpromc.easybrewing.item.AmountUpgradeItem;
 import com.coolerpromc.easybrewing.item.SpeedUpgradeItem;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
@@ -30,7 +29,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +70,6 @@ public class EasyBrewing implements ModInitializer {
 	public void onInitialize() {
         CapabilitiesEvent.registerCapabilities();
         ConfigEvent.onDatapackSync();
-        NetworkEvent.onRegisterPayloadHandlers();
         CommonConfig.CONFIG.load();
 
         ServerPlayNetworking.registerGlobalReceiver(CapabilityChangeSyncC2SPacket.TYPE, CapabilityChangeSyncC2SPacket::handle);
@@ -92,8 +89,8 @@ public class EasyBrewing implements ModInitializer {
         return Registry.register(Registries.ITEM, RegistryKey.of(RegistryKeys.ITEM, id(name)), func.apply(new Item.Settings()));
     }
 
-    public static <T extends ScreenHandler> ScreenHandlerType<T> registerMenu(String name, ExtendedScreenHandlerType.ExtendedFactory<T, BlockPos> factory){
-        return Registry.register(Registries.SCREEN_HANDLER, RegistryKey.of(RegistryKeys.SCREEN_HANDLER, id(name)), new ExtendedScreenHandlerType<>(factory, BlockPos.PACKET_CODEC));
+    public static <T extends ScreenHandler> ScreenHandlerType<T> registerMenu(String name, ExtendedScreenHandlerType.ExtendedFactory<T> factory){
+        return Registry.register(Registries.SCREEN_HANDLER, RegistryKey.of(RegistryKeys.SCREEN_HANDLER, id(name)), new ExtendedScreenHandlerType<>(factory));
     }
 
     public static Identifier id(String path){
