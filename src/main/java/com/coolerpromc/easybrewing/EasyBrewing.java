@@ -92,7 +92,7 @@ public class EasyBrewing {
 
     public static <T extends Block> DeferredBlock<T> registerBlock(String name, Function<BlockBehaviour.Properties, T> func){
         DeferredBlock<T> block = BLOCKS.registerBlock(name, func);
-        registerItem(name, properties -> new BlockItem(block.get(), properties));
+        registerItem(name, properties -> new BlockItem(block.get(), properties.useBlockDescriptionPrefix()));
         return block;
     }
 

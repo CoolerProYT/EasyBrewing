@@ -1,0 +1,2 @@
+- Fixed missing translation for Item Brewing Station item
+- Fixed `[Hold Shift for details]` in Item Brewing Station screen not working
