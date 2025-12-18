@@ -1,62 +1,63 @@
 package com.coolerpromc.easybrewing.compat.rei.brewing;
 
-import com.google.gson.internal.LinkedTreeMap;
-import net.minecraft.client.Minecraft;
+import com.google.common.collect.Sets;
+import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
-import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.brewing.BrewingRecipe;
-import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
+import net.minecraftforge.common.brewing.IBrewingRecipe;
+import net.minecraftforge.common.brewing.VanillaBrewingRecipe;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class PotionHelper {
     public static List<BrewingRecipe> registerPotions() {
-        PotionBrewing brewing = Minecraft.getInstance().level.potionBrewing();
         List<BrewingRecipe> recipes = new ArrayList<>();
-        registerVanillaPotions(brewing, recipes);
-        for (IBrewingRecipe recipe : brewing.getRecipes()) {
-            if (recipe instanceof BrewingRecipe brewingRecipe) {
-                recipes.add(brewingRecipe);
+        for (IBrewingRecipe recipe : BrewingRecipeRegistry.getRecipes()) {
+            if (recipe instanceof VanillaBrewingRecipe) {
+                registerVanillaPotions(recipes);
+            } else if (recipe instanceof net.minecraftforge.common.brewing.BrewingRecipe) {
+                net.minecraftforge.common.brewing.BrewingRecipe brewingRecipe = (net.minecraftforge.common.brewing.BrewingRecipe) recipe;
+                recipes.add(new BrewingRecipe(brewingRecipe.getInput(), brewingRecipe.getIngredient(), brewingRecipe.getOutput().copy()));
             }
         }
         return recipes;
     }
 
-    private static void registerVanillaPotions(PotionBrewing brewing, List<BrewingRecipe> recipes) {
-        Set<Holder<Potion>> potions = Collections.newSetFromMap(new LinkedTreeMap<>(Comparator.comparing(Holder::getRegisteredName), false));
-        for (Ingredient container : brewing.containers) {
-            for (PotionBrewing.Mix<Potion> mix : brewing.potionMixes) {
-                Holder<Potion> from = mix.from();
-                Ingredient ingredient = mix.ingredient();
-                Holder<Potion> to = mix.to();
+    private static void registerVanillaPotions(List<BrewingRecipe> recipes) {
+        Set<Potion> potions = Sets.newLinkedHashSet();
+        for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
+            for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
+                Holder.Reference<Potion> from = mix.from;
+                Ingredient ingredient = mix.ingredient;
+                Holder.Reference<Potion> to = mix.to;
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
-                        .peek(stack -> stack.set(DataComponents.POTION_CONTENTS, new PotionContents(from))));
+                        .map(stack -> PotionUtils.setPotion(stack, from.get())));
                 ItemStack output = Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
-                        .peek(stack -> stack.set(DataComponents.POTION_CONTENTS, new PotionContents(to)))
+                        .map(stack -> PotionUtils.setPotion(stack, to.get()))
                         .findFirst().orElse(ItemStack.EMPTY);
-                potions.add(from);
-                potions.add(to);
                 recipes.add(new BrewingRecipe(base, ingredient, output));
+                potions.add(from.get());
+                potions.add(to.get());
             }
         }
-        for (Holder<Potion> potion : potions) {
-            for (PotionBrewing.Mix<Item> mix : brewing.containerMixes) {
-                Holder<Item> from = mix.from();
-                Ingredient ingredient = mix.ingredient();
-                Holder<Item> to = mix.to();
-                ItemStack baseStack = new ItemStack(from);
-                baseStack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
-                Ingredient base = Ingredient.of(baseStack);
-                ItemStack output = new ItemStack(to);
-                output.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
+        for (Potion potion : potions) {
+            for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
+                Holder.Reference<Item> from = mix.from;
+                Ingredient ingredient = mix.ingredient;
+                Holder.Reference<Item> to = mix.to;
+                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
+                ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
                 recipes.add(new BrewingRecipe(base, ingredient, output));
             }
         }

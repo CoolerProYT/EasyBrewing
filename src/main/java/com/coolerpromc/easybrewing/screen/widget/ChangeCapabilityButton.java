@@ -26,7 +26,7 @@ public class ChangeCapabilityButton extends Button {
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.blitSprite(ResourceLocation.withDefaultNamespace("widget/button"), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + 1, slot.color);
         guiGraphics.fill(this.getX(), this.getY() + this.getHeight() - 1, this.getX() + this.getWidth(), this.getY() + this.getHeight(), slot.color);
@@ -39,6 +39,17 @@ public class ChangeCapabilityButton extends Button {
             tooltips.add(Component.translatable("screen.easybrewing.change_slot").withStyle(ChatFormatting.GRAY));
             guiGraphics.renderTooltip(Minecraft.getInstance().font, tooltips, Optional.empty(), mouseX, mouseY);
         }
+    }
+
+    private int getTextureY() {
+        int i = 1;
+        if (!this.active) {
+            i = 0;
+        } else if (this.isHoveredOrFocused()) {
+            i = 2;
+        }
+
+        return 46 + i * 20;
     }
 
     public void setSlot(ItemBrewingStationBE.Slot slot) {

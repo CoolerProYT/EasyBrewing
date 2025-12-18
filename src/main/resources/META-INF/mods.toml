@@ -16,8 +16,9 @@ config="${mod_id}.mixins.json"
 file="META-INF/accesstransformer.cfg"
 
 [[dependencies.${mod_id}]]
-    modId="neoforge"
+    modId="forge"
     type="required"
+    mandatory=true
     versionRange="[${neo_version},)"
     ordering="NONE"
     side="BOTH"
@@ -25,6 +26,7 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
+    mandatory=true
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"

@@ -1,7 +1,6 @@
 package com.coolerpromc.easybrewing.compat.rei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
-import com.coolerpromc.easybrewing.compat.cobblemon.CobblemonRecipeViewer;
 import com.coolerpromc.easybrewing.compat.jei.recipe.ItemBrewingRecipe;
 import com.coolerpromc.easybrewing.compat.rei.brewing.PotionHelper;
 import com.coolerpromc.easybrewing.network.packet.PotionCountSyncS2CPacket;
@@ -13,10 +12,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.forge.REIPluginClient;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,19 +22,16 @@ import java.util.List;
 public class ModReiPlugin implements REIClientPlugin {
     @Override
     public void registerCategories(CategoryRegistry registry) {
-        registry.add(new ItemBrewingCategory(), config -> config.addWorkstations(EntryStacks.of(EasyBrewing.ITEM_BREWING_STATION.toStack())));
+        registry.add(new ItemBrewingCategory(), config -> config.addWorkstations(EntryStacks.of(EasyBrewing.ITEM_BREWING_STATION.get())));
     }
 
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         List<ItemBrewingRecipe> recipes = new ArrayList<>(PotionHelper.registerPotions().stream().map(iJeiBrewingRecipe -> {
-            ItemStack output = iJeiBrewingRecipe.getOutput().copy();
+            ItemStack output = iJeiBrewingRecipe.output.copy();
             output.setCount(PotionCountSyncS2CPacket.POTION_COUNT);
-            return new ItemBrewingRecipe(Arrays.stream(iJeiBrewingRecipe.getIngredient().getItems()).map(ItemStack::copy).toList(), Arrays.stream(iJeiBrewingRecipe.getInput().getItems()).map(ItemStack::copy).peek(stack -> stack.setCount(PotionCountSyncS2CPacket.POTION_COUNT)).toList(), output);
+            return new ItemBrewingRecipe(Arrays.stream(iJeiBrewingRecipe.ingredient.getItems()).map(ItemStack::copy).toList(), Arrays.stream(iJeiBrewingRecipe.input.getItems()).map(ItemStack::copy).peek(stack -> stack.setCount(PotionCountSyncS2CPacket.POTION_COUNT)).toList(), output);
         }).toList());
-        if (ModList.get().isLoaded("cobblemon")){
-            CobblemonRecipeViewer.addRecipes(recipes, Minecraft.getInstance().level);
-        }
         recipes.forEach(recipe -> registry.add(new ItemBrewingDisplay(recipe)));
     }
 

@@ -28,7 +28,7 @@ public class ItemBrewingCategory implements DisplayCategory<ItemBrewingDisplay> 
 
     @Override
     public Renderer getIcon() {
-        return EntryStacks.of(EasyBrewing.ITEM_BREWING_STATION.toStack());
+        return EntryStacks.of(EasyBrewing.ITEM_BREWING_STATION.get());
     }
 
     @Override

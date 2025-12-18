@@ -14,14 +14,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewingStationMenu> {
-    private static final ResourceLocation FUEL_LENGTH_SPRITE = ResourceLocation.withDefaultNamespace("container/brewing_stand/fuel_length");
+    private static final ResourceLocation FUEL_LENGTH_SPRITE = new ResourceLocation("container/brewing_stand/fuel_length");
     private static final ResourceLocation ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
     private static final ResourceLocation BREW_PROGRESS_SPRITE = EasyBrewing.id("brew_progress");
 
@@ -55,7 +54,7 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
     private void onPress(Button button){
         if (button instanceof ChangeCapabilityButton btn){
             btn.setSlot(btn.getSlot().next());
-            PacketDistributor.sendToServer(new CapabilityChangeSyncC2SPacket(this.menu.getBlockEntity().getBlockPos(), btn.getDirection(), btn.getSlot()));
+            EasyBrewing.CHANNEL.sendToServer(new CapabilityChangeSyncC2SPacket(this.menu.getBlockEntity().getBlockPos(), btn.getDirection(), btn.getSlot()));
         }
     }
 
@@ -72,17 +71,18 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
 
         int l = Mth.clamp((18 * this.menu.getFuel() + 20 - 1) / 20, 0, 18);
 
-        guiGraphics.blitSprite(FUEL_LENGTH_SPRITE, 18, 4, 0, 0, leftPos + 16, topPos + 37, l, 4);
+        guiGraphics.blit(new ResourceLocation("textures/gui/container/brewing_stand.png"), leftPos + 16, topPos + 37, 176, 29, l, 4);
 
         int progress = this.menu.getProgress();
         int maxProgress = this.menu.getMaxProgress();
 
         int progressHeight = (int) (28f * (1f - (float) progress / maxProgress));
-        guiGraphics.blitSprite(BREW_PROGRESS_SPRITE, 9, 28, 0, 0, leftPos + 97, topPos + 16, 9, 28 - progressHeight);
+        guiGraphics.blit(new ResourceLocation("textures/gui/container/brewing_stand.png"), leftPos + 97, topPos + 16, 176, 0, 9, 28 - progressHeight);
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
         renderArrowTooltip(guiGraphics, mouseX, mouseY);

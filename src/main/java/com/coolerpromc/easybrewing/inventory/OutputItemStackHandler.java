@@ -1,7 +1,7 @@
 package com.coolerpromc.easybrewing.inventory;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 public class OutputItemStackHandler extends ItemStackHandler {
     @Override
@@ -17,7 +17,7 @@ public class OutputItemStackHandler extends ItemStackHandler {
             ItemStack existing = this.stacks.get(slot);
             int limit = this.getStackLimit(slot, stack);
             if (!existing.isEmpty()) {
-                if (!ItemStack.isSameItemSameComponents(stack, existing)) {
+                if (!ItemStack.isSameItemSameTags(stack, existing)) {
                     return stack;
                 }
 

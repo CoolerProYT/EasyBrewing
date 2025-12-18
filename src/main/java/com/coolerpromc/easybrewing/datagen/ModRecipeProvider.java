@@ -1,26 +1,25 @@
 package com.coolerpromc.easybrewing.datagen;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.common.Tags;
+import net.minecraftforge.common.Tags;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class ModRecipeProvider extends RecipeProvider {
-    public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+    public ModRecipeProvider(PackOutput output) {
+        super(output);
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.ITEM_BREWING_STATION.asItem(), 1)
+    protected void buildRecipes(Consumer<FinishedRecipe> recipeOutput) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.ITEM_BREWING_STATION.get(), 1)
                 .pattern(" D ")
                 .pattern("DBD")
                 .pattern("SSS")
@@ -50,10 +49,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("GRG")
                 .define('G', Tags.Items.INGOTS_GOLD)
                 .define('R', Tags.Items.DUSTS_REDSTONE)
-                .define('S', EasyBrewing.UPGRADE_BASE)
+                .define('S', EasyBrewing.UPGRADE_BASE.get())
                 .unlockedBy("has_gold_ingot", has(Tags.Items.INGOTS_GOLD))
                 .unlockedBy("has_redstone_dust", has(Tags.Items.DUSTS_REDSTONE))
-                .unlockedBy(getHasName(EasyBrewing.UPGRADE_BASE), has(EasyBrewing.UPGRADE_BASE))
+                .unlockedBy(getHasName(EasyBrewing.UPGRADE_BASE.get()), has(EasyBrewing.UPGRADE_BASE.get()))
                 .save(recipeOutput);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_2.get(), 1)
@@ -62,10 +61,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("LRL")
                 .define('L', Tags.Items.STORAGE_BLOCKS_LAPIS)
                 .define('R', Tags.Items.DUSTS_REDSTONE)
-                .define('S', EasyBrewing.SPEED_UPGRADE_1)
+                .define('S', EasyBrewing.SPEED_UPGRADE_1.get())
                 .unlockedBy("has_lapis_lazuli_block", has(Tags.Items.STORAGE_BLOCKS_LAPIS))
                 .unlockedBy("has_redstone_dust", has(Tags.Items.DUSTS_REDSTONE))
-                .unlockedBy(getHasName(EasyBrewing.SPEED_UPGRADE_1), has(EasyBrewing.SPEED_UPGRADE_1))
+                .unlockedBy(getHasName(EasyBrewing.SPEED_UPGRADE_1.get()), has(EasyBrewing.SPEED_UPGRADE_1.get()))
                 .save(recipeOutput);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.SPEED_UPGRADE_3.get(), 1)
@@ -74,10 +73,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("BRB")
                 .define('B', Tags.Items.STORAGE_BLOCKS_REDSTONE)
                 .define('R', Tags.Items.DUSTS_REDSTONE)
-                .define('S', EasyBrewing.SPEED_UPGRADE_2)
+                .define('S', EasyBrewing.SPEED_UPGRADE_2.get())
                 .unlockedBy("has_redstone_block", has(Tags.Items.STORAGE_BLOCKS_REDSTONE))
                 .unlockedBy("has_redstone_dust", has(Tags.Items.DUSTS_REDSTONE))
-                .unlockedBy(getHasName(EasyBrewing.SPEED_UPGRADE_2), has(EasyBrewing.SPEED_UPGRADE_2))
+                .unlockedBy(getHasName(EasyBrewing.SPEED_UPGRADE_2.get()), has(EasyBrewing.SPEED_UPGRADE_2.get()))
                 .save(recipeOutput);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.AMOUNT_UPGRADE_1.get(), 1)
@@ -86,10 +85,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("GBG")
                 .define('G', Items.GLASS_BOTTLE)
                 .define('B', Items.BLAZE_POWDER)
-                .define('U', EasyBrewing.UPGRADE_BASE)
+                .define('U', EasyBrewing.UPGRADE_BASE.get())
                 .unlockedBy("has_glass_bottle", has(Items.GLASS_BOTTLE))
                 .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
-                .unlockedBy(getHasName(EasyBrewing.UPGRADE_BASE), has(EasyBrewing.UPGRADE_BASE))
+                .unlockedBy(getHasName(EasyBrewing.UPGRADE_BASE.get()), has(EasyBrewing.UPGRADE_BASE.get()))
                 .save(recipeOutput);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, EasyBrewing.AMOUNT_UPGRADE_2.get(), 1)
@@ -98,10 +97,10 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("GDG")
                 .define('G', Items.GLASS_BOTTLE)
                 .define('D', Tags.Items.GEMS_DIAMOND)
-                .define('A', EasyBrewing.AMOUNT_UPGRADE_1)
+                .define('A', EasyBrewing.AMOUNT_UPGRADE_1.get())
                 .unlockedBy("has_glass_bottle", has(Items.GLASS_BOTTLE))
                 .unlockedBy("has_diamond", has(Tags.Items.GEMS_DIAMOND))
-                .unlockedBy(getHasName(EasyBrewing.AMOUNT_UPGRADE_1), has(EasyBrewing.AMOUNT_UPGRADE_1))
+                .unlockedBy(getHasName(EasyBrewing.AMOUNT_UPGRADE_1.get()), has(EasyBrewing.AMOUNT_UPGRADE_1.get()))
                 .save(recipeOutput);
     }
 }

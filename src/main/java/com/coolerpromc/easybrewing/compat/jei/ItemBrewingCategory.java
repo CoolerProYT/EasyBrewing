@@ -2,7 +2,6 @@ package com.coolerpromc.easybrewing.compat.jei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.compat.jei.recipe.ItemBrewingRecipe;
-import com.coolerpromc.easybrewing.network.packet.PotionCountSyncS2CPacket;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -14,10 +13,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
 
 public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<ItemBrewingRecipe> {
     public static final RecipeType<ItemBrewingRecipe> TYPE = RecipeType.create(EasyBrewing.MODID, "item_brewing", ItemBrewingRecipe.class);
@@ -34,7 +30,7 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
 
     @Override
     public @Nullable IDrawable getIcon() {
-        return helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, EasyBrewing.ITEM_BREWING_STATION.toStack());
+        return helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, EasyBrewing.ITEM_BREWING_STATION.get().asItem().getDefaultInstance());
     }
 
     @Override
