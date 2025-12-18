@@ -4,11 +4,11 @@ import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.widget.ChangeCapabilityButton;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -29,6 +29,7 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
 
     private final CyclingSlotBackground potionIcon = new CyclingSlotBackground(37);
     private final List<ChangeCapabilityButton> capabilityButtons = new ArrayList<>();
+    private boolean hasShift = false;
 
     public ItemBrewingStationScreen(ItemBrewingStationMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -100,7 +101,7 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
             tooltip.add(Component.translatable("screen.easbrewing.arrow_tooltip", this.menu.getProgress(), this.menu.getMaxProgress()));
             tooltip.add(Component.translatable("screen.easybrewing.speed_multiplier_tooltip", String.format("%.2f", this.menu.getSpeedMultiplier())).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable("screen.easybrewing.crafting_amount", this.menu.getAdditionalUpgrade()).withStyle(ChatFormatting.GRAY));
-            if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isShiftKeyDown()){
+            if (hasShift){
                 tooltip.add(Component.translatable("screen.easybrewing.max_speed_upgrade", this.menu.getMaxUpgrade()).withStyle(ChatFormatting.GRAY));
                 tooltip.add(Component.translatable("screen.easybrewing.max_amount_upgrade", this.menu.getMaxAmountUpgrade()).withStyle(ChatFormatting.GRAY));
             }
@@ -125,5 +126,17 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
                 guiGraphics.fill(baseX + 18 - 1, baseY, baseX + 18, baseY + 18, btn.getSlot().color);
             }
         }
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        hasShift = event.hasShiftDown();
+        return super.keyPressed(event);
+    }
+
+    @Override
+    public boolean keyReleased(KeyEvent event) {
+        hasShift = event.hasShiftDown();
+        return super.keyReleased(event);
     }
 }
