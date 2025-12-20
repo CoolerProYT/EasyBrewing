@@ -94,7 +94,7 @@ public class ItemBrewingStationScreen extends HandledScreen<ItemBrewingStationMe
 
         if (mouseX >= arrowX && mouseX <= arrowX + 9 && mouseY >= arrowY && mouseY <= arrowY + 28){
             List<Text> tooltip = new ArrayList<>();
-            tooltip.add(Text.translatable("screen.easbrewing.arrow_tooltip", this.handler.getProgress(), this.handler.getMaxProgress()));
+            tooltip.add(Text.translatable("screen.easybrewing.arrow_tooltip", this.handler.getProgress(), this.handler.getMaxProgress()));
             tooltip.add(Text.translatable("screen.easybrewing.speed_multiplier_tooltip", String.format("%.2f", this.handler.getSpeedMultiplier())).formatted(Formatting.GRAY));
             tooltip.add(Text.translatable("screen.easybrewing.crafting_amount", this.handler.getAdditionalUpgrade()).formatted(Formatting.GRAY));
             if (hasShiftDown()){
