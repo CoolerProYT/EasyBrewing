@@ -95,7 +95,7 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
 
         if (mouseX >= arrowX && mouseX <= arrowX + 9 && mouseY >= arrowY && mouseY <= arrowY + 28){
             List<Component> tooltip = new ArrayList<>();
-            tooltip.add(Component.translatable("screen.easbrewing.arrow_tooltip", this.menu.getProgress(), this.menu.getMaxProgress()));
+            tooltip.add(Component.translatable("screen.easybrewing.arrow_tooltip", this.menu.getProgress(), this.menu.getMaxProgress()));
             tooltip.add(Component.translatable("screen.easybrewing.speed_multiplier_tooltip", String.format("%.2f", this.menu.getSpeedMultiplier())).withStyle(ChatFormatting.GRAY));
             tooltip.add(Component.translatable("screen.easybrewing.crafting_amount", this.menu.getAdditionalUpgrade()).withStyle(ChatFormatting.GRAY));
             if (hasShiftDown()){
