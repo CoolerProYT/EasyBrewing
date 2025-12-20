@@ -7,7 +7,7 @@
   "item.easybrewing.speed_upgrade_3": "Speed Upgrade 3",
   "item.easybrewing.amount_upgrade_1": "Amount Upgrade 1",
   "item.easybrewing.amount_upgrade_2": "Amount Upgrade 2",
-  "screen.easbrewing.arrow_tooltip": "Progress: %d/%d ticks",
+  "screen.easybrewing.arrow_tooltip": "Progress: %d/%d ticks",
   "screen.easybrewing.speed_multiplier_tooltip": "Speed Multiplier: %sx",
   "screen.easybrewing.max_speed_upgrade": "Max Effective Speed Upgrade: %d",
   "screen.easybrewing.crafting_amount": "Additional Amount: +%d",
