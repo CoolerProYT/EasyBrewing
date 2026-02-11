@@ -46,8 +46,8 @@ import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;import java.util.HashMap;
+import java.util.Map;import static com.coolerpromc.easybrewing.block.ItemBrewingStationBlock.FACING;
 
 @SuppressWarnings("ConstantConditions")
 public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
@@ -137,7 +137,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     public int fuel = 0;
     private float multiplier = 1f;
     public int additionalAmount = 0;
-    private Map<Direction, Slot> capabilityBySide = new HashMap<>();
+    private Map<RelativeSide, Slot> capabilityBySide = new EnumMap<>(RelativeSide.class);
 
     public ItemBrewingStationBE(BlockPos pos, BlockState blockState) {
         super(EasyBrewing.ITEM_BREWING_STATION_BE.get(), pos, blockState);
@@ -181,12 +181,12 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     public void initCapabilityBySide(){
-        capabilityBySide.putIfAbsent(Direction.DOWN, Slot.OUTPUT);
-        capabilityBySide.putIfAbsent(Direction.UP, Slot.FUEL);
-        capabilityBySide.putIfAbsent(Direction.NORTH, Slot.POTION);
-        capabilityBySide.putIfAbsent(Direction.SOUTH, Slot.POTION);
-        capabilityBySide.putIfAbsent(Direction.WEST, Slot.INPUT);
-        capabilityBySide.putIfAbsent(Direction.EAST, Slot.INPUT);
+        capabilityBySide.putIfAbsent(RelativeSide.BOTTOM, Slot.OUTPUT);
+        capabilityBySide.putIfAbsent(RelativeSide.TOP, Slot.FUEL);
+        capabilityBySide.putIfAbsent(RelativeSide.LEFT, Slot.POTION);
+        capabilityBySide.putIfAbsent(RelativeSide.RIGHT, Slot.POTION);
+        capabilityBySide.putIfAbsent(RelativeSide.FRONT, Slot.INPUT);
+        capabilityBySide.putIfAbsent(RelativeSide.BACK, Slot.INPUT);
     }
 
     @Override
@@ -213,7 +213,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         output.putInt("fuel", fuel);
         output.putFloat("multiplier", multiplier);
         output.putInt("additionalAmount", additionalAmount);
-        output.store("capabilityBySide", ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC), capabilityBySide);
+        output.store("capabilityBySide", ExtraCodecs.strictUnboundedMap(RelativeSide.CODEC, Slot.CODEC), capabilityBySide);
     }
 
     @Override
@@ -230,7 +230,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         fuel = input.getIntOr("fuel", 0);
         multiplier = input.getFloatOr("multiplier", 1f);
         additionalAmount = input.getIntOr("additionalAmount", 0);
-        capabilityBySide = new HashMap<>(input.read("capabilityBySide", ExtraCodecs.strictUnboundedMap(Direction.CODEC, Slot.CODEC)).orElse(new HashMap<>()));
+        capabilityBySide = new HashMap<>(input.read("capabilityBySide", ExtraCodecs.strictUnboundedMap(RelativeSide.CODEC, Slot.CODEC)).orElse(new HashMap<>()));
     }
 
     @Override
@@ -380,16 +380,23 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER && side != null) {
-            return switch (capabilityBySide.get(side)) {
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction direction) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER && direction != null) {
+            Direction facing = getBlockState().getValue(FACING);
+            RelativeSide side = getRelativeSide(direction, facing);
+            if (side == null) return null;
+
+            Slot slot = capabilityBySide.get(side);
+            if (slot == null) return null;
+
+            return switch (slot) {
                 case FUEL -> fuelCap.cast();
                 case POTION -> potionCap.cast();
                 case INPUT -> inputCap.cast();
                 case OUTPUT -> outputCap.cast();
             };
         }
-        return super.getCapability(cap, side);
+        return super.getCapability(cap, direction);
     }
 
     @Override
@@ -408,7 +415,27 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         outputCap = LazyOptional.of(() -> outputHandler);
     }
 
-    public void setCapabilityBySide(Direction direction, Slot slot){
+    private RelativeSide getRelativeSide(Direction worldSide, Direction facing) {
+        if (worldSide == Direction.UP) return RelativeSide.TOP;
+        if (worldSide == Direction.DOWN) return RelativeSide.BOTTOM;
+
+        if (worldSide == facing) {
+            return RelativeSide.FRONT;
+        }
+        if (worldSide == facing.getOpposite()) {
+            return RelativeSide.BACK;
+        }
+        if (worldSide == facing.getCounterClockWise()) {
+            return RelativeSide.RIGHT;
+        }
+        if (worldSide == facing.getClockWise()) {
+            return RelativeSide.LEFT;
+        }
+
+        return null;
+    }
+
+    public void setCapabilityBySide(RelativeSide direction, Slot slot){
         capabilityBySide.put(direction, slot);
         setChanged();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
@@ -416,7 +443,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         recreateCapabilities();
     }
 
-    public Slot getCapabilityBySide(Direction direction){
+    public Slot getCapabilityBySide(RelativeSide direction){
         return capabilityBySide.get(direction);
     }
 
@@ -462,5 +489,17 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         public Slot next(){
             return values()[(ordinal() + 1) % values().length];
         }
+    }
+
+    public enum RelativeSide {
+        FRONT,
+        BACK,
+        LEFT,
+        RIGHT,
+        TOP,
+        BOTTOM;
+
+        public static final Codec<RelativeSide> CODEC = Codec.STRING.xmap(RelativeSide::valueOf, RelativeSide::name);
+        public static final StreamCodec<RegistryFriendlyByteBuf, RelativeSide> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
     }
 }
