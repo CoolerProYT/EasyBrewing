@@ -17,10 +17,10 @@
   "tooltip.easybrewing.amount_upgrade_disabled": "Amount upgrade has been disabled in the config.",
   "tooltip.easybrewing.amount_upgrade_tooltip": "+%d Item consumed and crafted",
   "screen.easybrewing.change_slot": "Click to change slot",
-  "screen.easybrewing.direction_up": "Up",
-  "screen.easybrewing.direction_down": "Down",
-  "screen.easybrewing.direction_north": "North",
-  "screen.easybrewing.direction_south": "South",
-  "screen.easybrewing.direction_east": "East",
-  "screen.easybrewing.direction_west": "West"
+  "screen.easybrewing.direction_top": "Top",
+  "screen.easybrewing.direction_bottom": "Bottom",
+  "screen.easybrewing.direction_front": "Front",
+  "screen.easybrewing.direction_back": "Back",
+  "screen.easybrewing.direction_left": "Left",
+  "screen.easybrewing.direction_right": "Right"
 }
