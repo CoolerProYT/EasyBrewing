@@ -11,14 +11,15 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ChangeCapabilityButton extends Button {
-    private final Direction direction;
+    private final ItemBrewingStationBE.RelativeSide direction;
     private ItemBrewingStationBE.Slot slot;
 
-    public ChangeCapabilityButton(int x, int y, int width, int height, Component message, OnPress onPress, Direction direction, ItemBrewingStationBE.Slot slot) {
+    public ChangeCapabilityButton(int x, int y, int width, int height, Component message, OnPress onPress, ItemBrewingStationBE.RelativeSide direction, ItemBrewingStationBE.Slot slot) {
         super(x, y, width, height, message, onPress, Supplier::get);
         this.direction = direction;
         this.slot = slot;
@@ -35,7 +36,7 @@ public class ChangeCapabilityButton extends Button {
 
         if (this.isHovered){
             List<Component> tooltips = new ArrayList<>();
-            tooltips.add(Component.translatable("screen.easybrewing.direction_" + direction.getName()));
+            tooltips.add(Component.translatable("screen.easybrewing.direction_" + direction.name().toLowerCase(Locale.ROOT)));
             tooltips.add(Component.translatable("screen.easybrewing.change_slot").withStyle(ChatFormatting.GRAY));
             guiGraphics.renderTooltip(Minecraft.getInstance().font, tooltips, Optional.empty(), mouseX, mouseY);
         }
@@ -60,7 +61,7 @@ public class ChangeCapabilityButton extends Button {
         return slot;
     }
 
-    public Direction getDirection() {
+    public ItemBrewingStationBE.RelativeSide getDirection() {
         return direction;
     }
 }

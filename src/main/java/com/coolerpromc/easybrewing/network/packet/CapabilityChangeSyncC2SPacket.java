@@ -10,9 +10,9 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record CapabilityChangeSyncC2SPacket(BlockPos pos, Direction direction, ItemBrewingStationBE.Slot slot) {
+public record CapabilityChangeSyncC2SPacket(BlockPos pos, ItemBrewingStationBE.RelativeSide direction, ItemBrewingStationBE.Slot slot) {
     public static CapabilityChangeSyncC2SPacket decode(FriendlyByteBuf buf){
-        return new CapabilityChangeSyncC2SPacket(buf.readBlockPos(), buf.readEnum(Direction.class), buf.readEnum(ItemBrewingStationBE.Slot.class));
+        return new CapabilityChangeSyncC2SPacket(buf.readBlockPos(), buf.readEnum(ItemBrewingStationBE.RelativeSide.class), buf.readEnum(ItemBrewingStationBE.Slot.class));
     }
 
     public static void encode(CapabilityChangeSyncC2SPacket packet, FriendlyByteBuf buf){
