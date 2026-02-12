@@ -11,14 +11,15 @@ import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ChangeCapabilityButton extends ButtonWidget {
-    private final Direction direction;
+    private final ItemBrewingStationBE.RelativeSide direction;
     private ItemBrewingStationBE.Slot slot;
 
-    public ChangeCapabilityButton(int x, int y, int width, int height, net.minecraft.text.Text message, PressAction onPress, Direction direction, ItemBrewingStationBE.Slot slot) {
+    public ChangeCapabilityButton(int x, int y, int width, int height, net.minecraft.text.Text message, PressAction onPress, ItemBrewingStationBE.RelativeSide direction, ItemBrewingStationBE.Slot slot) {
         super(x, y, width, height, message, onPress, Supplier::get);
         this.direction = direction;
         this.slot = slot;
@@ -35,7 +36,7 @@ public class ChangeCapabilityButton extends ButtonWidget {
 
         if (this.hovered){
             List<net.minecraft.text.Text> tooltips = new ArrayList<>();
-            tooltips.add(net.minecraft.text.Text.translatable("screen.easybrewing.direction_" + direction.name()));
+            tooltips.add(net.minecraft.text.Text.translatable("screen.easybrewing.direction_" + direction.name().toLowerCase(Locale.ROOT)));
             tooltips.add(net.minecraft.text.Text.translatable("screen.easybrewing.change_slot").formatted(Formatting.GRAY));
             guiGraphics.drawTooltip(MinecraftClient.getInstance().textRenderer, tooltips, Optional.empty(), mouseX, mouseY);
         }
@@ -49,7 +50,7 @@ public class ChangeCapabilityButton extends ButtonWidget {
         return slot;
     }
 
-    public Direction getDirection() {
+    public ItemBrewingStationBE.RelativeSide getDirection() {
         return direction;
     }
 }
