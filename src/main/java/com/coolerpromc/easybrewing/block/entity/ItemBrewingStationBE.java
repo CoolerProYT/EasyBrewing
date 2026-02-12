@@ -42,8 +42,11 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.coolerpromc.easybrewing.block.ItemBrewingStationBlock.FACING;
 
 @SuppressWarnings("ConstantConditions")
 public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenHandlerFactory {
@@ -83,7 +86,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     public int fuel = 0;
     private float multiplier = 1f;
     public int additionalAmount = 0;
-    private Map<Direction, Slot> capabilityBySide = new HashMap<>();
+    private Map<RelativeSide, Slot> capabilityBySide = new EnumMap<>(RelativeSide.class);
 
     public ItemBrewingStationBE(BlockPos pos, BlockState blockState) {
         super(EasyBrewing.ITEM_BREWING_STATION_BE, pos, blockState);
@@ -129,12 +132,12 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
     }
 
     public void initCapabilityBySide(){
-        capabilityBySide.putIfAbsent(Direction.DOWN, Slot.OUTPUT);
-        capabilityBySide.putIfAbsent(Direction.UP, Slot.FUEL);
-        capabilityBySide.putIfAbsent(Direction.NORTH, Slot.POTION);
-        capabilityBySide.putIfAbsent(Direction.SOUTH, Slot.POTION);
-        capabilityBySide.putIfAbsent(Direction.WEST, Slot.INPUT);
-        capabilityBySide.putIfAbsent(Direction.EAST, Slot.INPUT);
+        capabilityBySide.putIfAbsent(RelativeSide.BOTTOM, Slot.OUTPUT);
+        capabilityBySide.putIfAbsent(RelativeSide.TOP, Slot.FUEL);
+        capabilityBySide.putIfAbsent(RelativeSide.LEFT, Slot.POTION);
+        capabilityBySide.putIfAbsent(RelativeSide.RIGHT, Slot.POTION);
+        capabilityBySide.putIfAbsent(RelativeSide.FRONT, Slot.INPUT);
+        capabilityBySide.putIfAbsent(RelativeSide.BACK, Slot.INPUT);
     }
 
     @Override
@@ -167,7 +170,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         tag.putInt("fuel", fuel);
         tag.putFloat("multiplier", multiplier);
         tag.putInt("additionalAmount", additionalAmount);
-        tag.put("capabilityBySide", Codec.unboundedMap(Direction.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow(false, EasyBrewing.LOGGER::error));
+        tag.put("capabilityBySide", Codec.unboundedMap(RelativeSide.CODEC, Slot.CODEC).encodeStart(NbtOps.INSTANCE, capabilityBySide).getOrThrow(false, EasyBrewing.LOGGER::error));
     }
 
     @Override
@@ -185,7 +188,7 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         fuel = tag.getInt("fuel");
         multiplier = tag.getFloat("multiplier");
         additionalAmount = tag.getInt("additionalAmount");
-        capabilityBySide = new HashMap<>(Codec.unboundedMap(Direction.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow(false, EasyBrewing.LOGGER::error));
+        capabilityBySide = new HashMap<>(Codec.unboundedMap(RelativeSide.CODEC, Slot.CODEC).parse(NbtOps.INSTANCE, tag.getCompound("capabilityBySide")).getOrThrow(false, EasyBrewing.LOGGER::error));
     }
 
     @Override
@@ -340,7 +343,13 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
 
     public @Nullable Storage<ItemVariant> getCapability(@Nullable Direction direction) {
         if (direction == null) return null;
-        Slot slot = capabilityBySide.get(direction);
+
+        Direction facing = getCachedState().get(FACING);
+        RelativeSide side = getRelativeSide(direction, facing);
+        if (side == null) return null;
+
+        Slot slot = capabilityBySide.get(side);
+        if (slot == null) return null;
 
         return switch (slot){
             case FUEL -> fuelStorage;
@@ -350,13 +359,33 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         };
     }
 
-    public void setCapabilityBySide(Direction direction, Slot slot){
+    private RelativeSide getRelativeSide(Direction worldSide, Direction facing) {
+        if (worldSide == Direction.UP) return RelativeSide.TOP;
+        if (worldSide == Direction.DOWN) return RelativeSide.BOTTOM;
+
+        if (worldSide == facing) {
+            return RelativeSide.FRONT;
+        }
+        if (worldSide == facing.getOpposite()) {
+            return RelativeSide.BACK;
+        }
+        if (worldSide == facing.rotateYCounterclockwise()) {
+            return RelativeSide.RIGHT;
+        }
+        if (worldSide == facing.rotateYClockwise()) {
+            return RelativeSide.LEFT;
+        }
+
+        return null;
+    }
+
+    public void setCapabilityBySide(RelativeSide direction, Slot slot){
         capabilityBySide.put(direction, slot);
         markDirty();
         world.updateListeners(getPos(), getCachedState(), getCachedState(), 3);
     }
 
-    public Slot getCapabilityBySide(Direction direction){
+    public Slot getCapabilityBySide(RelativeSide direction){
         return capabilityBySide.get(direction);
     }
 
@@ -396,5 +425,16 @@ public class ItemBrewingStationBE extends BlockEntity implements ExtendedScreenH
         public Slot next(){
             return values()[(ordinal() + 1) % values().length];
         }
+    }
+
+    public enum RelativeSide {
+        FRONT,
+        BACK,
+        LEFT,
+        RIGHT,
+        TOP,
+        BOTTOM;
+
+        public static final Codec<RelativeSide> CODEC = Codec.STRING.xmap(RelativeSide::valueOf, RelativeSide::name);
     }
 }

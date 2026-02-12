@@ -10,9 +10,8 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
-public record CapabilityChangeSyncC2SPacket(BlockPos pos, Direction direction, ItemBrewingStationBE.Slot slot) {
+public record CapabilityChangeSyncC2SPacket(BlockPos pos, ItemBrewingStationBE.RelativeSide direction, ItemBrewingStationBE.Slot slot) {
     public static final Identifier TYPE = EasyBrewing.id("capability_change_sync");
 
     public static PacketByteBuf encode(PacketByteBuf buf, CapabilityChangeSyncC2SPacket packet){
@@ -23,14 +22,16 @@ public record CapabilityChangeSyncC2SPacket(BlockPos pos, Direction direction, I
     }
 
     public static CapabilityChangeSyncC2SPacket decode(PacketByteBuf buf){
-        return new CapabilityChangeSyncC2SPacket(buf.readBlockPos(), buf.readEnumConstant(Direction.class), buf.readEnumConstant(ItemBrewingStationBE.Slot.class));
+        return new CapabilityChangeSyncC2SPacket(buf.readBlockPos(), buf.readEnumConstant(ItemBrewingStationBE.RelativeSide.class), buf.readEnumConstant(ItemBrewingStationBE.Slot.class));
     }
 
     public static void handle(MinecraftServer server, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender){
         CapabilityChangeSyncC2SPacket packet = decode(buf);
-        BlockEntity blockEntity = playerEntity.getServerWorld().getBlockEntity(packet.pos);
-        if (blockEntity instanceof ItemBrewingStationBE be){
-            be.setCapabilityBySide(packet.direction, packet.slot);
-        }
+        server.execute(() -> {
+            BlockEntity blockEntity = playerEntity.getServerWorld().getBlockEntity(packet.pos);
+            if (blockEntity instanceof ItemBrewingStationBE be){
+                be.setCapabilityBySide(packet.direction, packet.slot);
+            }
+        });
     }
 }

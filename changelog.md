@@ -1,15 +1,1 @@
-Added translation for multiple language (Translated by Gemini):
-- de_de
-- es_es
-- fr_fr
-- it_it
-- ja_jp
-- ko_kr
-- pl_pl
-- pt_br
-- ru_ru
-- tr_tr
-- uk_ua
-- zh_cn
-- zh_hk
-- zh_tw
+- Changed capability button from world direction to block direction
