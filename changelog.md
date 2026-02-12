@@ -1,1 +1,1 @@
-Lowered Fabric Loader version to depend on `0.17.3+` instead of `0.18.2+`
+- Changed capability button from world direction to block direction

@@ -1,6 +1,7 @@
 package com.coolerpromc.easybrewing.screen;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
+import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.widget.ChangeCapabilityButton;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -39,12 +40,12 @@ public class ItemBrewingStationScreen extends HandledScreen<ItemBrewingStationMe
 
     private void createCapabilityButtons(){
         capabilityButtons.clear();
-        capabilityButtons.add(new ChangeCapabilityButton(x + 152, y + 49, 8, 8, Text.empty(), this::onPress, Direction.UP, this.handler.getBlockEntity().getCapabilityBySide(Direction.UP)));
-        capabilityButtons.add(new ChangeCapabilityButton(x + 144, y + 57, 8, 8, Text.empty(), this::onPress, Direction.EAST, this.handler.getBlockEntity().getCapabilityBySide(Direction.EAST)));
-        capabilityButtons.add(new ChangeCapabilityButton(x + 152, y + 57, 8, 8, Text.empty(), this::onPress, Direction.NORTH, this.handler.getBlockEntity().getCapabilityBySide(Direction.NORTH)));
-        capabilityButtons.add(new ChangeCapabilityButton(x + 160, y + 57, 8, 8, Text.empty(), this::onPress, Direction.WEST, this.handler.getBlockEntity().getCapabilityBySide(Direction.WEST)));
-        capabilityButtons.add(new ChangeCapabilityButton(x + 144, y + 65, 8, 8, Text.empty(), this::onPress, Direction.SOUTH, this.handler.getBlockEntity().getCapabilityBySide(Direction.SOUTH)));
-        capabilityButtons.add(new ChangeCapabilityButton(x + 152, y + 65, 8, 8, Text.empty(), this::onPress, Direction.DOWN, this.handler.getBlockEntity().getCapabilityBySide(Direction.DOWN)));
+        capabilityButtons.add(new ChangeCapabilityButton(x + 152, y + 49, 8, 8, Text.empty(), this::onPress, ItemBrewingStationBE.RelativeSide.TOP, this.handler.getBlockEntity().getCapabilityBySide(ItemBrewingStationBE.RelativeSide.TOP)));
+        capabilityButtons.add(new ChangeCapabilityButton(x + 144, y + 57, 8, 8, Text.empty(), this::onPress, ItemBrewingStationBE.RelativeSide.LEFT, this.handler.getBlockEntity().getCapabilityBySide(ItemBrewingStationBE.RelativeSide.LEFT)));
+        capabilityButtons.add(new ChangeCapabilityButton(x + 152, y + 57, 8, 8, Text.empty(), this::onPress, ItemBrewingStationBE.RelativeSide.FRONT, this.handler.getBlockEntity().getCapabilityBySide(ItemBrewingStationBE.RelativeSide.FRONT)));
+        capabilityButtons.add(new ChangeCapabilityButton(x + 160, y + 57, 8, 8, Text.empty(), this::onPress, ItemBrewingStationBE.RelativeSide.RIGHT, this.handler.getBlockEntity().getCapabilityBySide(ItemBrewingStationBE.RelativeSide.RIGHT)));
+        capabilityButtons.add(new ChangeCapabilityButton(x + 144, y + 65, 8, 8, Text.empty(), this::onPress, ItemBrewingStationBE.RelativeSide.BACK, this.handler.getBlockEntity().getCapabilityBySide(ItemBrewingStationBE.RelativeSide.BACK)));
+        capabilityButtons.add(new ChangeCapabilityButton(x + 152, y + 65, 8, 8, Text.empty(), this::onPress, ItemBrewingStationBE.RelativeSide.BOTTOM, this.handler.getBlockEntity().getCapabilityBySide(ItemBrewingStationBE.RelativeSide.BOTTOM)));
 
         for (ChangeCapabilityButton btn : capabilityButtons){
             this.addDrawableChild(btn);
