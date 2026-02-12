@@ -1,1 +1,1 @@
-- Changed capability button from world direction to block direction
+- Fixed left and right side buttons are functioning oppositely.

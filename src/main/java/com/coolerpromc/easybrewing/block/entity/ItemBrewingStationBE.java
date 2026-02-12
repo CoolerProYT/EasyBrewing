@@ -397,10 +397,10 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
             return RelativeSide.BACK;
         }
         if (worldSide == facing.getCounterClockWise()) {
-            return RelativeSide.LEFT;
+            return RelativeSide.RIGHT;
         }
         if (worldSide == facing.getClockWise()) {
-            return RelativeSide.RIGHT;
+            return RelativeSide.LEFT;
         }
 
         return null;
