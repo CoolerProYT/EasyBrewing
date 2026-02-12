@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.rei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
@@ -9,8 +10,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,8 +21,8 @@ public class ItemBrewingCategory implements DisplayCategory<ItemBrewingDisplay> 
     }
 
     @Override
-    public Text getTitle() {
-        return Text.translatable("block.easybrewing.item_brewing_station");
+    public Component getTitle() {
+        return Component.translatable("block.easybrewing.item_brewing_station");
     }
 
     @Override
@@ -51,3 +51,4 @@ public class ItemBrewingCategory implements DisplayCategory<ItemBrewingDisplay> 
         return widgets;
     }
 }
+*/

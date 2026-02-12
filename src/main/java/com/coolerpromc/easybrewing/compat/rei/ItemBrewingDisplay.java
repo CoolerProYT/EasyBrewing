@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.rei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
@@ -26,3 +27,4 @@ public record ItemBrewingDisplay(BrewingRecipe recipe) implements Display {
         return CATEGORY_IDENTIFIER;
     }
 }
+*/

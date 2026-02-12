@@ -1,10 +1,9 @@
 package com.coolerpromc.easybrewing.block.entity.renderer.state;
 
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.client.render.item.ItemRenderState;
-
 import java.util.List;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 
 public class ItemBrewingStationRenderState extends BlockEntityRenderState {
-    public List<ItemRenderState> itemRenderStates;
+    public List<ItemStackRenderState> itemRenderStates;
 }

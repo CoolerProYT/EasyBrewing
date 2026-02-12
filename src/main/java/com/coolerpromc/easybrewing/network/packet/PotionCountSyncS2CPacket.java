@@ -4,20 +4,20 @@ import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.config.CommonConfig;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record PotionCountSyncS2CPacket(int potionCount, int cobblemonPotionCount) implements CustomPayload {
-    public static final Id<PotionCountSyncS2CPacket> TYPE = new Id<>(EasyBrewing.id("potion_count_sync"));
+public record PotionCountSyncS2CPacket(int potionCount, int cobblemonPotionCount) implements CustomPacketPayload {
+    public static final Type<PotionCountSyncS2CPacket> TYPE = new Type<>(EasyBrewing.id("potion_count_sync"));
     public static int POTION_COUNT = CommonConfig.CONFIG.potionCount();
     public static int COBBLEMON_POTION_COUNT = CommonConfig.CONFIG.cobblemonPotionCount;
 
-    public static final PacketCodec<RegistryByteBuf, PotionCountSyncS2CPacket> STREAM_CODEC = PacketCodec.tuple(
-            PacketCodecs.INTEGER,
+    public static final StreamCodec<RegistryFriendlyByteBuf, PotionCountSyncS2CPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT,
             PotionCountSyncS2CPacket::potionCount,
-            PacketCodecs.INTEGER,
+            ByteBufCodecs.INT,
             PotionCountSyncS2CPacket::cobblemonPotionCount,
             PotionCountSyncS2CPacket::new
     );
@@ -28,7 +28,7 @@ public record PotionCountSyncS2CPacket(int potionCount, int cobblemonPotionCount
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 }

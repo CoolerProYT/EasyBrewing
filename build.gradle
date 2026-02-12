@@ -1,5 +1,5 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
     id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
@@ -41,20 +41,19 @@ fabricApi {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation include("com.electronwill.night-config:core:3.8.1")
-    modImplementation include("com.electronwill.night-config:toml:3.8.1")
+    implementation include("com.electronwill.night-config:core:3.8.1")
+    implementation include("com.electronwill.night-config:toml:3.8.1")
 
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}"
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
+//    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}"
+//    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
 
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")
-    modCompileOnly("mezz.jei:jei-${minecraft_version}-fabric:${jei_version}")
+    compileOnly("mezz.jei:jei-26.1-snapshot-4-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-26.1-snapshot-4-fabric:${jei_version}")
 
-    modCompileOnly "maven.modrinth:cobblemon:1.7.1-fabric,1.21.1"
+//    compileOnly "maven.modrinth:cobblemon:1.7.1-fabric,1.21.1"
 }
 
 processResources {
@@ -66,14 +65,14 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
@@ -102,8 +101,8 @@ publishing {
 }
 
 publishMods {
-    file.set(remapJar.archiveFile)
-    type = STABLE
+    file.set(jar.archiveFile)
+    type = BETA
     modLoaders.add("fabric")
     changelog = file("changelog.md").text
     displayName = "easybrewing-" + mod_version
@@ -111,7 +110,7 @@ publishMods {
     curseforge {
         projectId = "1405256"
         accessToken = findProperty("CF_TOKEN")
-        minecraftVersions.add(minecraft_version)
+        minecraftVersions.add("26.1-snapshot")
     }
 
     modrinth {

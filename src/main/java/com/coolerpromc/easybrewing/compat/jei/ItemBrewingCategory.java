@@ -1,4 +1,3 @@
-/*
 package com.coolerpromc.easybrewing.compat.jei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
@@ -11,10 +10,10 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<ItemBrewingRecipe> {
@@ -26,13 +25,13 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
     }
 
     @Override
-    public Text getTitle() {
-        return Text.translatable("block.easybrewing.item_brewing_station");
+    public Component getTitle() {
+        return Component.translatable("block.easybrewing.item_brewing_station");
     }
 
     @Override
     public @Nullable IDrawable getIcon() {
-        return helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, EasyBrewing.ITEM_BREWING_STATION.asItem().getDefaultStack());
+        return helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, EasyBrewing.ITEM_BREWING_STATION.asItem().getDefaultInstance());
     }
 
     @Override
@@ -53,9 +52,8 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
     }
 
     @Override
-    public void draw(ItemBrewingRecipe recipe, IRecipeSlotsView recipeSlotsView, DrawContext guiGraphics, double mouseX, double mouseY) {
+    public void draw(ItemBrewingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         Identifier ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
-        guiGraphics.drawTexture(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60, 256, 256);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60, 256, 256);
     }
 }
-*/

@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.rei;
 
 import com.coolerpromc.easybrewing.EasyBrewing;
@@ -26,3 +27,4 @@ public class ModReiPlugin implements REIClientPlugin {
         registry.registerClickArea(screen -> new Rectangle(((screen.width - 176) / 2) + 76, ((screen.height - 166) / 2) + 34, 20, 22), ItemBrewingStationScreen.class, ItemBrewingDisplay.CATEGORY_IDENTIFIER);
     }
 }
+*/

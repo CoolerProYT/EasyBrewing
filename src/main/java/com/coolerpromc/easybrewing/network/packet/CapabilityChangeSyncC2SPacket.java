@@ -3,17 +3,17 @@ package com.coolerpromc.easybrewing.network.packet;
 import com.coolerpromc.easybrewing.EasyBrewing;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-public record CapabilityChangeSyncC2SPacket(BlockPos pos, ItemBrewingStationBE.RelativeSide direction, ItemBrewingStationBE.Slot slot) implements CustomPayload {
-    public static final Id<CapabilityChangeSyncC2SPacket> TYPE = new Id<>(EasyBrewing.id("capability_change_sync"));
+public record CapabilityChangeSyncC2SPacket(BlockPos pos, ItemBrewingStationBE.RelativeSide direction, ItemBrewingStationBE.Slot slot) implements CustomPacketPayload {
+    public static final Type<CapabilityChangeSyncC2SPacket> TYPE = new Type<>(EasyBrewing.id("capability_change_sync"));
 
-    public static final PacketCodec<RegistryByteBuf, CapabilityChangeSyncC2SPacket> STREAM_CODEC = PacketCodec.tuple(
-            BlockPos.PACKET_CODEC,
+    public static final StreamCodec<RegistryFriendlyByteBuf, CapabilityChangeSyncC2SPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC,
             CapabilityChangeSyncC2SPacket::pos,
             ItemBrewingStationBE.RelativeSide.STREAM_CODEC,
             CapabilityChangeSyncC2SPacket::direction,
@@ -23,14 +23,14 @@ public record CapabilityChangeSyncC2SPacket(BlockPos pos, ItemBrewingStationBE.R
     );
 
     public static void handle(CapabilityChangeSyncC2SPacket packet, ServerPlayNetworking.Context context){
-        BlockEntity blockEntity = context.player().getEntityWorld().getBlockEntity(packet.pos);
+        BlockEntity blockEntity = context.player().level().getBlockEntity(packet.pos);
         if (blockEntity instanceof ItemBrewingStationBE be){
             be.setCapabilityBySide(packet.direction, packet.slot);
         }
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 }
