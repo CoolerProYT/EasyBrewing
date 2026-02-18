@@ -352,8 +352,8 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
 
         output.setCount(CommonConfig.CONFIG.potionCount() + additionalAmount);
 
-        if (!ingredient.getCraftingRemainder().isEmpty()) {
-            ItemStack leftover = ingredient.getCraftingRemainder();
+        if (ingredient.getCraftingRemainder() != null) {
+            ItemStack leftover = ingredient.getCraftingRemainder().create();
             ingredient.shrink(1);
             if (ingredient.isEmpty()) {
                 ingredient = leftover;

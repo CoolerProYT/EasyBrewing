@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.124'
+    id 'net.neoforged.moddev' version '2.0.140'
     id 'idea'
     id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
@@ -28,15 +28,10 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     version = project.neo_version
-
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     runs {
         client {
@@ -80,16 +75,16 @@ configurations {
 }
 
 dependencies {
-    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
-    implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    compileOnly "mezz.jei:jei-26.1-snapshot-4-neoforge-api:${jei_version}"
+    compileOnly "mezz.jei:jei-26.1-snapshot-4-neoforge:${jei_version}"
 
-    compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
-    compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
-    compileOnly  "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+//    compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
+//    compileOnly "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"
+//    compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
+//    compileOnly  "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 
-    compileOnly "curse.maven:kotlin-for-forge-351264:6994056"
-    compileOnly "curse.maven:cobblemon-687131:7273151"
+//    compileOnly "curse.maven:kotlin-for-forge-351264:6994056"
+//    compileOnly "curse.maven:cobblemon-687131:7273151"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -140,7 +135,7 @@ idea {
 
 publishMods {
     file.set(jar.archiveFile)
-    type = STABLE
+    type = BETA
     modLoaders.add("neoforge")
     changelog = file("changelog.md").text
     displayName = "Easy Brewing - " + mod_version
@@ -148,7 +143,7 @@ publishMods {
     curseforge {
         projectId = "1405256"
         accessToken = findProperty("CF_TOKEN")
-        minecraftVersions.add(minecraft_version)
+        minecraftVersions.add("26.1-snapshot")
     }
 
     modrinth {

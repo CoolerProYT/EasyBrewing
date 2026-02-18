@@ -1,3 +1,4 @@
+/*
 package com.coolerpromc.easybrewing.compat.rei.brewing;
 
 import com.coolerpromc.easybrewing.network.packet.PotionCountSyncS2CPacket;
@@ -77,3 +78,4 @@ public class PotionHelper {
         }
     }
 }
+*/

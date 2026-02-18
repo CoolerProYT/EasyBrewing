@@ -3,8 +3,6 @@ package com.coolerpromc.easybrewing;
 import com.coolerpromc.easybrewing.block.ItemBrewingStationBlock;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.config.CommonConfig;
-import com.coolerpromc.easybrewing.fluid.ModFluidTypes;
-import com.coolerpromc.easybrewing.fluid.ModFluids;
 import com.coolerpromc.easybrewing.item.AmountUpgradeItem;
 import com.coolerpromc.easybrewing.item.SpeedUpgradeItem;
 import com.coolerpromc.easybrewing.screen.ItemBrewingStationMenu;
@@ -83,9 +81,6 @@ public class EasyBrewing {
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         MENUS.register(modEventBus);
-
-        ModFluidTypes.register(modEventBus);
-        ModFluids.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, CommonConfig.CONFIG_SPEC);
     }

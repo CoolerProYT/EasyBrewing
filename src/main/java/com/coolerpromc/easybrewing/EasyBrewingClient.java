@@ -1,7 +1,6 @@
 package com.coolerpromc.easybrewing;
 
 import com.coolerpromc.easybrewing.block.entity.renderer.ItemBrewingStationBER;
-import com.coolerpromc.easybrewing.fluid.ModFluidTypes;
 import com.coolerpromc.easybrewing.screen.ItemBrewingStationScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -10,7 +9,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
@@ -19,11 +17,6 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 public class EasyBrewingClient {
     public EasyBrewingClient(ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-    }
-
-    @SubscribeEvent
-    public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
-        event.registerFluidType(ModFluidTypes.POTION_FLUID.get().getClientFluidTypeExtensions(), ModFluidTypes.POTION_FLUID.get());
     }
 
     @SubscribeEvent
