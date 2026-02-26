@@ -1,1 +1,1 @@
-- Changed capability button from world direction to block direction
+- Port to 26.1-snapshot-10
