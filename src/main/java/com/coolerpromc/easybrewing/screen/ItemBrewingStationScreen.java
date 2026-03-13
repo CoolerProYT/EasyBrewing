@@ -5,7 +5,7 @@ import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.widget.ChangeCapabilityButton;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
@@ -69,30 +69,30 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
     }
 
     @Override
-    protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1) {
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
-        this.potionIcon.render(this.menu, guiGraphics, v, leftPos, topPos);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
+        this.potionIcon.extractRenderState(this.menu, graphics, a, leftPos, topPos);
 
         int l = Mth.clamp((18 * this.menu.getFuel() + 20 - 1) / 20, 0, 18);
 
-        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, FUEL_LENGTH_SPRITE, 18, 4, 0, 0, leftPos + 16, topPos + 37, l, 4);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FUEL_LENGTH_SPRITE, 18, 4, 0, 0, leftPos + 16, topPos + 37, l, 4);
 
         int progress = this.menu.getProgress();
         int maxProgress = this.menu.getMaxProgress();
 
         int progressHeight = (int) (28f * (1f - (float) progress / maxProgress));
-        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, BREW_PROGRESS_SPRITE, 9, 28, 0, 0, leftPos + 97, topPos + 16, 9, 28 - progressHeight);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BREW_PROGRESS_SPRITE, 9, 28, 0, 0, leftPos + 97, topPos + 16, 9, 28 - progressHeight);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        renderTooltip(guiGraphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         renderArrowTooltip(guiGraphics, mouseX, mouseY);
         renderSlotOutline(guiGraphics);
     }
 
-    private void renderArrowTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY){
+    private void renderArrowTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY){
         int arrowX = leftPos + 97;
         int arrowY = topPos + 16;
 
@@ -112,7 +112,7 @@ public class ItemBrewingStationScreen extends AbstractContainerScreen<ItemBrewin
         }
     }
 
-    private void renderSlotOutline(GuiGraphics guiGraphics){
+    private void renderSlotOutline(GuiGraphicsExtractor guiGraphics){
         for (ChangeCapabilityButton btn : capabilityButtons){
             if (btn.isHovered()){
                 Slot slot = this.menu.getSlot(btn.getSlot().slotIndex);
