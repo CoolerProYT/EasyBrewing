@@ -91,12 +91,22 @@ loom {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
-			from components.java
+            groupId = maven_group
+            artifactId = archives_base_name
+            version = mod_version
+            from components.java
 		}
 	}
 
 	repositories {
+        mavenLocal()
+        maven {
+            url = findProperty("maven_url")
+            credentials {
+                username = findProperty("maven_username")
+                password = findProperty("maven_password")
+            }
+        }
 	}
 }
 

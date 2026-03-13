@@ -12,11 +12,13 @@ import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.ItemBrewingStationMenu;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -27,6 +29,9 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.LingeringPotionItem;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.SplashPotionItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -69,12 +74,18 @@ public class EasyBrewing implements ModInitializer {
             }).build());
 
 
-    @Override
+	@Override
 	public void onInitialize() {
         CapabilitiesEvent.registerCapabilities();
         ConfigEvent.onDatapackSync();
         NetworkEvent.onRegisterPayloadHandlers();
         CommonConfig.CONFIG.load();
+
+        DefaultItemComponentEvents.MODIFY.register(context -> {
+            context.modify(item -> item instanceof PotionItem || item instanceof LingeringPotionItem || item instanceof SplashPotionItem, (builder, item) -> {
+                builder.set(DataComponents.MAX_STACK_SIZE, CommonConfig.CONFIG.potionStackSize);
+            });
+        });
 
         ServerPlayNetworking.registerGlobalReceiver(CapabilityChangeSyncC2SPacket.TYPE, CapabilityChangeSyncC2SPacket::handle);
 	}
