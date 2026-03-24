@@ -51,9 +51,9 @@ public record ItemBrewingCategory(IGuiHelper helper) implements IRecipeCategory<
         return 60;
     }
 
-    /*@Override
+    @Override
     public void draw(ItemBrewingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY) {
         Identifier ITEM_BREWING_STATION = EasyBrewing.id("textures/gui/item_brewing_station.png");
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ITEM_BREWING_STATION, 0, 0, 35, 15, 100, 60, 256, 256);
-    }*/
+    }
 }

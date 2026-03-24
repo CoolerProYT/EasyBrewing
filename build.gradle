@@ -50,8 +50,8 @@ dependencies {
 //    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}"
 //    modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
 
-    compileOnly("mezz.jei:jei-26.1-snapshot-4-common-api:${jei_version}")
-    compileOnly("mezz.jei:jei-26.1-snapshot-4-fabric:${jei_version}")
+    compileOnly "mezz.jei:jei-26.1-pre-3-neoforge-api:${jei_version}"
+    compileOnly("mezz.jei:jei-26.1-pre-3-fabric:${jei_version}")
 
 //    compileOnly "maven.modrinth:cobblemon:1.7.1-fabric,1.21.1"
 }
@@ -112,7 +112,7 @@ publishing {
 
 publishMods {
     file.set(jar.archiveFile)
-    type = BETA
+    type = STABLE
     modLoaders.add("fabric")
     changelog = file("changelog.md").text
     displayName = "easybrewing-" + mod_version
@@ -120,7 +120,7 @@ publishMods {
     curseforge {
         projectId = "1405256"
         accessToken = findProperty("CF_TOKEN")
-        minecraftVersions.add("26.1-snapshot")
+        minecraftVersions.add(minecraft_version)
     }
 
     modrinth {
