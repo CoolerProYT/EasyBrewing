@@ -1,1 +1,1 @@
-- Changed capability button from world direction to block direction
+- Fixed hopper cant insert more than 1 potion to brewing stand when cobblemon is installed

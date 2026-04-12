@@ -11,6 +11,7 @@ import com.coolerpromc.easybrewing.item.SpeedUpgradeItem;
 import com.coolerpromc.easybrewing.network.packet.CapabilityChangeSyncC2SPacket;
 import com.coolerpromc.easybrewing.screen.ItemBrewingStationMenu;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.item.v1.DefaultItemComponentEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
@@ -19,9 +20,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.*;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -74,6 +74,12 @@ public class EasyBrewing implements ModInitializer {
         ConfigEvent.onDatapackSync();
         NetworkEvent.onRegisterPayloadHandlers();
         CommonConfig.CONFIG.load();
+
+        DefaultItemComponentEvents.MODIFY.register(context -> {
+            context.modify(item -> item instanceof PotionItem || item instanceof LingeringPotionItem || item instanceof SplashPotionItem, (builder, item) -> {
+                builder.add(DataComponentTypes.MAX_STACK_SIZE, CommonConfig.CONFIG.potionStackSize);
+            });
+        });
 
         ServerPlayNetworking.registerGlobalReceiver(CapabilityChangeSyncC2SPacket.TYPE, CapabilityChangeSyncC2SPacket::handle);
 	}
