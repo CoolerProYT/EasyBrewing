@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "easybrewing:block/item_brewing_station"
+    },
+    "facing=east": {
+      "model": "easybrewing:block/item_brewing_station",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "easybrewing:block/item_brewing_station",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "easybrewing:block/item_brewing_station",
+      "y": 270
+    }
+  }
+}
