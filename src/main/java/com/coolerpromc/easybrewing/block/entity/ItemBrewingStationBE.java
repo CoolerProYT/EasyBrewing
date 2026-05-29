@@ -38,6 +38,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,6 +89,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
             }
         }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return isIngredientValid(stack);
+        }
     };
     public final OutputItemStackHandler outputHandler = new OutputItemStackHandler(){
         @Override
@@ -122,10 +128,13 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         }
     };
 
+    private final IItemHandler combinedHandler = new CombinedInvWrapper(inputHandler, fuelHandler, potionHandler, outputHandler);
+
     private LazyOptional<IItemHandler> fuelCap = LazyOptional.of(() -> fuelHandler);
     private LazyOptional<IItemHandler> potionCap = LazyOptional.of(() -> potionHandler);
     private LazyOptional<IItemHandler> inputCap = LazyOptional.of(() -> inputHandler);
     private LazyOptional<IItemHandler> outputCap = LazyOptional.of(() -> outputHandler);
+    private LazyOptional<IItemHandler> combinedCap = LazyOptional.of(() -> combinedHandler);
 
     private int progress = 0;
     private int maxProgress = CommonConfig.CONFIG.processingTime.get();
@@ -426,6 +435,9 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
                 case OUTPUT -> outputCap.cast();
             };
         }
+        else if (cap == ForgeCapabilities.ITEM_HANDLER && direction == null){
+            return combinedCap.cast();
+        }
         return super.getCapability(cap, direction);
     }
 
@@ -478,7 +490,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     private boolean isValidPotion(ItemStack stack){
-        return stack.getItem() instanceof PotionItem || stack.is(Items.GLASS_BOTTLE) || BrewingRecipeRegistry.isValidInput(stack);
+        return stack.is(Items.GLASS_BOTTLE) || stack.getItem() instanceof PotionItem || BrewingRecipeRegistry.isValidInput(stack);
+    }
+
+    private boolean isIngredientValid(ItemStack stack){
+        return PotionBrewing.isIngredient(stack) || BrewingRecipeRegistry.isValidIngredient(stack);
     }
 
     public void drops(){

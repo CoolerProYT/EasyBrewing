@@ -20,6 +20,9 @@ repositories {
         url = "https://maven.blamejared.com/"
     }
     maven { url "https://maven.architectury.dev/" }
+    maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
+    maven { url = "https://maven.ithundxr.dev/mirror" } // Registrate
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // ForgeConfigAPIPort
 }
 
 base {
@@ -84,8 +87,16 @@ dependencies {
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
     compileOnly  fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
 
-    implementation fg.deobf("curse.maven:kotlin-for-forge-351264:7291067")
-    implementation fg.deobf("curse.maven:cobblemon-687131:5375390")
+    compileOnly fg.deobf("curse.maven:kotlin-for-forge-351264:7291067")
+    compileOnly fg.deobf("curse.maven:cobblemon-687131:5375390")
+
+    compileOnly(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
+    compileOnly(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
+    compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}"))
+    runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}"))
+    compileOnly(fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}"))
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    compileOnly("io.github.llamalad7:mixinextras-forge:0.4.1")
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -127,7 +138,11 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            url = findProperty("maven_url")
+            credentials {
+                username = findProperty("maven_username")
+                password = findProperty("maven_password")
+            }
         }
     }
 }
@@ -152,11 +167,13 @@ publishMods {
         projectId = "1405256"
         accessToken = findProperty("CF_TOKEN")
         minecraftVersions.add(minecraft_version)
+        optional("create")
     }
 
     modrinth {
         projectId = 'DusK80tO'
         accessToken = findProperty("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
+        optional("create")
     }
 }
