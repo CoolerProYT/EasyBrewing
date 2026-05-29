@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -91,6 +92,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
             }
         }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return isIngredientValid(stack);
+        }
     };
     public final OutputItemStackHandler outputHandler = new OutputItemStackHandler(){
         @Override
@@ -124,6 +130,8 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
             return stack.getItem() instanceof SpeedUpgradeItem;
         }
     };
+
+    private final IItemHandler combinedHandler = new CombinedInvWrapper(inputHandler, fuelHandler, potionHandler, outputHandler);
 
     private int progress = 0;
     private int maxProgress = CommonConfig.CONFIG.processingTime.getAsInt();
@@ -369,7 +377,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     public @Nullable IItemHandler getCapability(@Nullable Direction direction) {
-        if (direction == null) return null;
+        if (direction == null) return combinedHandler;
 
         Direction facing = getBlockState().getValue(FACING);
         RelativeSide side = getRelativeSide(direction, facing);
@@ -418,7 +426,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     private boolean isValidPotion(ItemStack stack){
-        return stack.getItem() instanceof PotionItem || stack.is(Items.GLASS_BOTTLE) || (ModList.get().isLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, level));
+        return level.potionBrewing().isInput(stack) || (ModList.get().isLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, level));
+    }
+
+    private boolean isIngredientValid(ItemStack stack){
+        return level.potionBrewing().isIngredient(stack) || (ModList.get().isLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonIngredient(stack, level));
     }
 
     public void drops(){

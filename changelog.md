@@ -1,1 +1,2 @@
-- Fixed left and right side buttons are functioning oppositely.
+## 1.3.0
+- Added compat to create `Mechanical Arm`, it can insert/extract from `Brewing Station` now

@@ -22,6 +22,8 @@ repositories {
         url = "https://maven.blamejared.com/"
     }
     maven { url "https://maven.architectury.dev/" }
+    maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
+    maven { url = "https://maven.ithundxr.dev/snapshots" } // Registrate
 }
 
 base {
@@ -88,8 +90,14 @@ dependencies {
     compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
 //    runtimeOnly  "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 
-    implementation "curse.maven:kotlin-for-forge-351264:6994056"
-    implementation "curse.maven:cobblemon-687131:7273151"
+    compileOnly "curse.maven:kotlin-for-forge-351264:6994056"
+    compileOnly "curse.maven:cobblemon-687131:7273151"
+
+    compileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    compileOnly("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
+    compileOnly("com.tterrag.registrate:Registrate:${registrate_version}")
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -122,7 +130,11 @@ publishing {
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = findProperty("maven_url")
+            credentials {
+                username = findProperty("maven_username")
+                password = findProperty("maven_password")
+            }
         }
     }
 }
@@ -149,11 +161,13 @@ publishMods {
         projectId = "1405256"
         accessToken = findProperty("CF_TOKEN")
         minecraftVersions.add(minecraft_version)
+        optional("create")
     }
 
     modrinth {
         projectId = 'DusK80tO'
         accessToken = findProperty("MODRINTH_TOKEN")
         minecraftVersions.add(minecraft_version)
+        optional("create")
     }
 }
