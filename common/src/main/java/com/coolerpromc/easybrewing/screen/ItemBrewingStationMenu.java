@@ -3,6 +3,7 @@ package com.coolerpromc.easybrewing.screen;
 import com.coolerpromc.easybrewing.CommonClass;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.inventory.SimpleItemHandler;
+import com.coolerpromc.easybrewing.screen.slot.MenuSlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -30,16 +31,16 @@ public class ItemBrewingStationMenu extends AbstractContainerMenu {
         addPlayerHotbar(playerInventory);
 
         SimpleItemHandler fuelHandler = this.blockEntity.fuelHandler;
-        this.addSlot(new Slot(fuelHandler, 0, 17, 17));
+        this.addSlot(new MenuSlot(fuelHandler, 0, 17, 17));
 
         SimpleItemHandler potionHandler = this.blockEntity.potionHandler;
-        this.addSlot(new Slot(potionHandler, 0, 79, 17));
+        this.addSlot(new MenuSlot(potionHandler, 0, 79, 17));
 
         SimpleItemHandler inputHandler = this.blockEntity.inputHandler;
-        this.addSlot(new Slot(inputHandler, 0, 59, 37));
+        this.addSlot(new MenuSlot(inputHandler, 0, 59, 37));
 
         // Output slot - no placing items
-        this.addSlot(new Slot(this.blockEntity.outputHandler, 0, 79, 57) {
+        this.addSlot(new MenuSlot(this.blockEntity.outputHandler, 0, 79, 57) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -47,8 +48,8 @@ public class ItemBrewingStationMenu extends AbstractContainerMenu {
         });
 
         SimpleItemHandler upgradeHandler = this.blockEntity.upgradeHandler;
-        this.addSlot(new Slot(upgradeHandler, 0, 154, 6));
-        this.addSlot(new Slot(upgradeHandler, 1, 154, 24));
+        this.addSlot(new MenuSlot(upgradeHandler, 0, 154, 6));
+        this.addSlot(new MenuSlot(upgradeHandler, 1, 154, 24));
 
         addDataSlots(data);
     }
