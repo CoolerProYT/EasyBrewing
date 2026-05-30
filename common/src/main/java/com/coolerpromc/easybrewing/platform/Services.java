@@ -1,10 +1,7 @@
 package com.coolerpromc.easybrewing.platform;
 
 import com.coolerpromc.easybrewing.Constants;
-import com.coolerpromc.easybrewing.platform.services.IMenuHelper;
-import com.coolerpromc.easybrewing.platform.services.INetworkHelper;
-import com.coolerpromc.easybrewing.platform.services.IPlatformHelper;
-import com.coolerpromc.easybrewing.platform.services.IRegistryHelper;
+import com.coolerpromc.easybrewing.platform.services.*;
 
 import java.util.ServiceLoader;
 
@@ -13,6 +10,7 @@ public class Services {
     public static final INetworkHelper NETWORK = load(INetworkHelper.class);
     public static final IMenuHelper MENU = load(IMenuHelper.class);
     public static final IRegistryHelper REGISTRY = load(IRegistryHelper.class);
+    public static final IPotionHelper POTION = load(IPotionHelper.class);
 
     public static <T> T load(Class<T> clazz) {
         final T loadedService = ServiceLoader.load(clazz, Services.class.getClassLoader()).findFirst().orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));

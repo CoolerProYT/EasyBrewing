@@ -34,7 +34,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -88,6 +87,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
             if (!level.isClientSide()) {
                 level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
             }
+        }
+
+        @Override
+        public boolean isValid(int slot, ItemStack stack) {
+            return isIngredientValid(stack);
         }
     };
     public final OutputItemStackHandler outputHandler = new OutputItemStackHandler(1) {
@@ -408,7 +412,11 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     }
 
     private boolean isValidPotion(ItemStack stack) {
-        return stack.getItem() instanceof PotionItem || stack.is(Items.GLASS_BOTTLE) || (Services.PLATFORM.isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, level));
+        return Services.POTION.isInput(level, stack) || (Services.PLATFORM.isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonBottle(stack, level));
+    }
+
+    private boolean isIngredientValid(ItemStack stack){
+        return Services.POTION.isIngredient(level, stack) || (Services.PLATFORM.isModLoaded("cobblemon") && CobblemonBottleIngredientCheck.isCobblemonIngredient(stack, level));
     }
 
     public void drops() {
