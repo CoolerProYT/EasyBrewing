@@ -17,6 +17,6 @@ public class ModBlockTagProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(CommonClass.ITEM_BREWING_STATION.get());
+                .add(CommonClass.ITEM_BREWING_STATION.key());
     }
 }

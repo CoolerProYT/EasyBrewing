@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:blaze_powder",
+    "D": "#c:gems/diamond",
+    "S": "#minecraft:stone_crafting_materials"
+  },
+  "pattern": [
+    " D ",
+    "DBD",
+    "SSS"
+  ],
+  "result": {
+    "id": "easybrewing:item_brewing_station"
+  }
+}

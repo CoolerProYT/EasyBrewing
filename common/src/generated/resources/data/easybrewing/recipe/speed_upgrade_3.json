@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "#c:storage_blocks/redstone",
+    "R": "#c:dusts/redstone",
+    "S": "easybrewing:speed_upgrade_2"
+  },
+  "pattern": [
+    "BRB",
+    "RSR",
+    "BRB"
+  ],
+  "result": {
+    "id": "easybrewing:speed_upgrade_3"
+  }
+}

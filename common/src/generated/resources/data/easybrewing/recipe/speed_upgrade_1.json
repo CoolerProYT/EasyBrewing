@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": "#c:ingots/gold",
+    "R": "#c:dusts/redstone",
+    "S": "easybrewing:upgrade_base"
+  },
+  "pattern": [
+    "GRG",
+    "RSR",
+    "GRG"
+  ],
+  "result": {
+    "id": "easybrewing:speed_upgrade_1"
+  }
+}
