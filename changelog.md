@@ -1,2 +1,1 @@
-- Fixed menu not checking if stack can place to a slot properly
-- Fixed modded brewing recipe not working
+- Fixed missing recipe and tags

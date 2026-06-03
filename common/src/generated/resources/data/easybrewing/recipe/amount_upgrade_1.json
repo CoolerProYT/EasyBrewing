@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:blaze_powder",
+    "G": "minecraft:glass_bottle",
+    "U": "easybrewing:upgrade_base"
+  },
+  "pattern": [
+    "GBG",
+    "BUB",
+    "GBG"
+  ],
+  "result": {
+    "id": "easybrewing:amount_upgrade_1"
+  }
+}

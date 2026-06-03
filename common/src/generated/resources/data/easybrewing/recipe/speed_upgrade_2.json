@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": "#c:storage_blocks/lapis",
+    "R": "#c:dusts/redstone",
+    "S": "easybrewing:speed_upgrade_1"
+  },
+  "pattern": [
+    "LRL",
+    "RSR",
+    "LRL"
+  ],
+  "result": {
+    "id": "easybrewing:speed_upgrade_2"
+  }
+}
