@@ -1,31 +1,29 @@
 package com.coolerpromc.easybrewing.datagen;
 
 import com.coolerpromc.easybrewing.CommonClass;
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.core.registries.MultiRegistryBootstrap;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.neoforged.neoforge.common.Tags;
 
-import java.util.concurrent.CompletableFuture;
-
 public class ModRecipeProvider extends RecipeProvider {
-    private final HolderGetter<Item> item;
-    public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput recipeOutput) {
-        super(registries, recipeOutput);
-        this.item = registries.lookupOrThrow(Registries.ITEM);
+    public ModRecipeProvider(BootstrapContext<Recipe<?>> recipeOutput, BootstrapContext<Advancement> advancementOutput) {
+        super(recipeOutput, advancementOutput);
+    }
+
+    public static MultiRegistryBootstrap create() {
+        return RecipeProvider.asBootstrap(ModRecipeProvider::new);
     }
 
     @Override
     protected void buildRecipes() {
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.ITEM_BREWING_STATION.asItem(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.ITEM_BREWING_STATION.asItem(), 1)
                 .pattern(" D ")
                 .pattern("DBD")
                 .pattern("SSS")
@@ -37,7 +35,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_stone_material", has(ItemTags.STONE_CRAFTING_MATERIALS))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.UPGRADE_BASE.get(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.UPGRADE_BASE.get(), 1)
                 .pattern("IPI")
                 .pattern("PBP")
                 .pattern("IPI")
@@ -49,7 +47,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.SPEED_UPGRADE_1.get(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.SPEED_UPGRADE_1.get(), 1)
                 .pattern("GRG")
                 .pattern("RSR")
                 .pattern("GRG")
@@ -61,7 +59,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(CommonClass.UPGRADE_BASE.get()), has(CommonClass.UPGRADE_BASE.get()))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.SPEED_UPGRADE_2.get(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.SPEED_UPGRADE_2.get(), 1)
                 .pattern("LRL")
                 .pattern("RSR")
                 .pattern("LRL")
@@ -73,7 +71,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(CommonClass.SPEED_UPGRADE_1.get()), has(CommonClass.SPEED_UPGRADE_1.get()))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.SPEED_UPGRADE_3.get(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.SPEED_UPGRADE_3.get(), 1)
                 .pattern("BRB")
                 .pattern("RSR")
                 .pattern("BRB")
@@ -85,7 +83,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(CommonClass.SPEED_UPGRADE_2.get()), has(CommonClass.SPEED_UPGRADE_2.get()))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.AMOUNT_UPGRADE_1.get(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.AMOUNT_UPGRADE_1.get(), 1)
                 .pattern("GBG")
                 .pattern("BUB")
                 .pattern("GBG")
@@ -97,7 +95,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(CommonClass.UPGRADE_BASE.get()), has(CommonClass.UPGRADE_BASE.get()))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(item, RecipeCategory.MISC, CommonClass.AMOUNT_UPGRADE_2.get(), 1)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, CommonClass.AMOUNT_UPGRADE_2.get(), 1)
                 .pattern("GDG")
                 .pattern("DAD")
                 .pattern("GDG")
@@ -108,21 +106,5 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_diamond", has(Tags.Items.GEMS_DIAMOND))
                 .unlockedBy(getHasName(CommonClass.AMOUNT_UPGRADE_1.get()), has(CommonClass.AMOUNT_UPGRADE_1.get()))
                 .save(output);
-    }
-
-    public static class Runner extends RecipeProvider.Runner{
-        protected Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
-            super(packOutput, registries);
-        }
-
-        @Override
-        protected RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
-            return new ModRecipeProvider(provider, recipeOutput);
-        }
-
-        @Override
-        public String getName() {
-            return "easybrewing recipe provider";
-        }
     }
 }

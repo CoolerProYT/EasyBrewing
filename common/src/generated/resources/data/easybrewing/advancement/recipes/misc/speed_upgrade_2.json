@@ -33,7 +33,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:speed_upgrade_2"
+        "recipes": "easybrewing:speed_upgrade_2"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

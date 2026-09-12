@@ -33,7 +33,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:item_brewing_station"
+        "recipes": "easybrewing:item_brewing_station"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

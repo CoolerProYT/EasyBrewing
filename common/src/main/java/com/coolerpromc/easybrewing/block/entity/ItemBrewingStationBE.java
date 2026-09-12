@@ -21,6 +21,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ExtraCodecs;
@@ -34,7 +35,11 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.crafting.BrewingInput;
+import net.minecraft.world.item.crafting.BrewingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,6 +51,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.coolerpromc.easybrewing.block.ItemBrewingStationBlock.FACING;
 
@@ -132,6 +138,7 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
     private float multiplier = 1f;
     public int additionalAmount = 0;
     private Map<RelativeSide, Slot> capabilityBySide = new EnumMap<>(RelativeSide.class);
+    private final RecipeManager.CachedCheck<BrewingInput, BrewingRecipe> quickCheck = RecipeManager.createCheck(RecipeType.BREWING);
 
     public ItemBrewingStationBE(BlockPos pos, BlockState blockState) {
         super(CommonClass.ITEM_BREWING_STATION_BE.get(), pos, blockState);
@@ -237,17 +244,18 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
 
     public void tick(Level level, BlockPos pos, BlockState blockState) {
         if (level.isClientSide()) return;
+        ServerLevel serverLevel = (ServerLevel) level;
 
         handleFuel();
         checkUpgrade();
 
-        if (isBrewable(level.potionBrewing()) || (Services.PLATFORM.isModLoaded("cobblemon")/* && CobblemonRecipeCheck.hasRecipe(this)*/)) {
+        if (isBrewable(serverLevel) || (Services.PLATFORM.isModLoaded("cobblemon")/* && CobblemonRecipeCheck.hasRecipe(this)*/)) {
             progress++;
             setChanged(level, pos, blockState);
 
             if (progress >= maxProgress) {
-                if (isBrewable(level.potionBrewing())) {
-                    doBrew(level.potionBrewing());
+                if (isBrewable(serverLevel)) {
+                    doBrew(serverLevel);
                 }
                 /*else if (Services.PLATFORM.isModLoaded("cobblemon")){
                     CobblemonRecipeCheck.craft(this);
@@ -300,16 +308,19 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         }
     }
 
-    private boolean isBrewable(PotionBrewing potionBrewing) {
+    private Optional<RecipeHolder<BrewingRecipe>> getRecipe(ServerLevel level) {
         ItemStack ingredient = inputHandler.getItem(0);
-        if (ingredient.isEmpty()) {
-            return false;
-        } else if (!potionBrewing.isIngredient(ingredient)) {
-            return false;
-        } else {
-            ItemStack potion = potionHandler.getItem(0);
-            return !potion.isEmpty() && potionBrewing.hasMix(potion, ingredient) && hasEnoughInput() && canInsertIntoOutputSlot(potionBrewing) && hasFuel();
+        ItemStack potion = potionHandler.getItem(0);
+        if (ingredient.isEmpty() || potion.isEmpty()) {
+            return Optional.empty();
         }
+
+        return quickCheck.getRecipeFor(new BrewingInput(potion, ingredient), level);
+    }
+
+    private boolean isBrewable(ServerLevel level) {
+        Optional<RecipeHolder<BrewingRecipe>> recipe = getRecipe(level);
+        return recipe.isPresent() && hasEnoughInput() && canInsertIntoOutputSlot(recipe.get().value()) && hasFuel();
     }
 
     public void getAdditionalAmount() {
@@ -329,16 +340,18 @@ public class ItemBrewingStationBE extends BlockEntity implements MenuProvider {
         return fuel > 0;
     }
 
-    private boolean canInsertIntoOutputSlot(PotionBrewing potionbrewing) {
-        ItemStack output = potionbrewing.mix(inputHandler.getItem(0), potionHandler.getItem(0));
+    private boolean canInsertIntoOutputSlot(BrewingRecipe recipe) {
+        ItemStack output = recipe.getOutput().create();
         output.setCount(CommonConfig.potionCount() + additionalAmount);
         return outputHandler.innerInsertItem(0, output, true) == output.getCount();
     }
 
-    private void doBrew(PotionBrewing potionbrewing) {
+    private void doBrew(ServerLevel level) {
+        Optional<RecipeHolder<BrewingRecipe>> recipe = getRecipe(level);
+        if (recipe.isEmpty()) return;
+
         ItemStack ingredient = inputHandler.getItem(0).copy();
-        ItemStack potion = potionHandler.getItem(0);
-        ItemStack output = potionbrewing.mix(ingredient, potion);
+        ItemStack output = recipe.get().value().getOutput().create();
 
         output.setCount(CommonConfig.potionCount() + additionalAmount);
 

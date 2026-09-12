@@ -33,7 +33,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "easybrewing:upgrade_base"
+        "recipes": "easybrewing:upgrade_base"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

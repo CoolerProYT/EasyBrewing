@@ -3,7 +3,6 @@ package com.coolerpromc.easybrewing.block;
 import com.coolerpromc.easybrewing.CommonClass;
 import com.coolerpromc.easybrewing.block.entity.ItemBrewingStationBE;
 import com.coolerpromc.easybrewing.platform.Services;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -59,11 +58,6 @@ public class ItemBrewingStationBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return simpleCodec(ItemBrewingStationBlock::new);
     }
 
     @Override

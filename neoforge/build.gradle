@@ -13,6 +13,14 @@ repositories {
             includeModule("net.neoforged", "testframework")
         }
     }
+    maven {
+        name = "coolerpromcMavenPrivate"
+        url = uri("https://maven.coolerpromc.com/private")
+        credentials {
+            username = findProperty("maven_username")
+            password = findProperty("maven_password")
+        }
+    }
 }
 
 neoForge {

@@ -2,6 +2,8 @@ package com.coolerpromc.easybrewing.datagen;
 
 import com.coolerpromc.easybrewing.Constants;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,10 +18,14 @@ public class DataGenerators {
     public static void onGatherData(GatherDataEvent.Client event) {
         DataGenerator generator = event.getGenerator();
         PackOutput packOutput = generator.getPackOutput();
-        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getReloadableLookupProvider();
 
-        event.addProvider(new ModLootTableProvider(packOutput, lookupProvider));
         event.addProvider(new ModBlockTagProvider(packOutput, lookupProvider));
-        event.addProvider(new ModRecipeProvider.Runner(packOutput, lookupProvider));
+
+        event.createReloadableRegistryObjects(
+                new RegistrySetBuilder()
+                        .add(Registries.LOOT_TABLE, new ModLootTableProvider())
+                        .add(ModRecipeProvider.create())
+        );
     }
 }

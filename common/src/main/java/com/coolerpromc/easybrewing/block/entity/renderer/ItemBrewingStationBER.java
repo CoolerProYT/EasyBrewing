@@ -73,7 +73,7 @@ public class ItemBrewingStationBER implements BlockEntityRenderer<ItemBrewingSta
         poseStack.pushPose();
 
         poseStack.translate(0.5, 0, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRotation));
+        poseStack.rotateDegrees(Axis.YP, yRotation);
         poseStack.translate(-0.5, 0, -0.5);
 
         renderItemStack(output, poseStack, nodeCollector, packedLight, 1.4, 0.3, -45f);
@@ -95,7 +95,7 @@ public class ItemBrewingStationBER implements BlockEntityRenderer<ItemBrewingSta
         poseStack.pushPose();
         poseStack.scale(0.25f, 0.25f, 0.25f);
         poseStack.translate(x, 1, z);
-        poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
+        poseStack.rotateDegrees(Axis.YP, rotation);
         renderState.submit(poseStack, nodeCollector, packedLight, OverlayTexture.NO_OVERLAY, 0);
         poseStack.popPose();
     }
