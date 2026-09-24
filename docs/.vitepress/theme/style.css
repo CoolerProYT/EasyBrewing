@@ -1,0 +1,37 @@
+:root {
+  --vp-c-brand-1: #8a3fb8;
+  --vp-c-brand-2: #9b52c9;
+  --vp-c-brand-3: #ad68d8;
+  --vp-c-brand-soft: rgba(138, 63, 184, 0.14);
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #8a3fb8 20%, #e8a317);
+  --vp-home-hero-image-background-image: radial-gradient(circle, rgba(173, 104, 216, 0.35) 0%, rgba(173, 104, 216, 0) 70%);
+  --vp-home-hero-image-filter: blur(40px);
+
+  --eb-slot-bg: #8b8b8b;
+  --eb-slot-dark: #373737;
+  --eb-slot-light: #ffffff;
+}
+
+.dark {
+  --vp-c-brand-1: #c58af0;
+  --vp-c-brand-2: #b374e3;
+  --vp-c-brand-3: #9b52c9;
+  --vp-c-brand-soft: rgba(197, 138, 240, 0.16);
+}
+
+/* Pixel art stays crisp at any size. */
+.VPHero .image-src,
+.pixelated {
+  image-rendering: pixelated;
+}
+
+.VPHero .image-src {
+  width: 220px;
+  height: 220px;
+}
+
+.eb-muted {
+  color: var(--vp-c-text-2);
+  font-size: 0.875em;
+}
